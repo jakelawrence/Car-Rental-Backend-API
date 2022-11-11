@@ -1,11 +1,19 @@
 {
   "name": "coding_challenge",
   "version": "1.0.0",
-  "description": "Node.js App for SmartCar coding challenge.",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jakelawrence/coding_challenge.git"
+  },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jakelawrence/coding_challenge/issues"
+  },
+  "homepage": "https://github.com/jakelawrence/coding_challenge#readme"
 }
