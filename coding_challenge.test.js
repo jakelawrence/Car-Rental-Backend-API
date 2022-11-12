@@ -1,23 +1,23 @@
 const request = require("supertest");
-const app = require("./index");
+const app = require("./routes");
 
 describe("Create and insert Vehicle", () => {
-  let vehicleId = 1;
-  // test("POST /vehicles", (done) => {
-  //   request(app)
-  //     .post("/vehicles")
-  //     .send({
-  //       make: "Honda",
-  //     })
-  //     .expect((res) => {
-  //       res.body.make = "Honda";
-  //     })
-  //     .end((err, res) => {
-  //       if (err) return done(err);
-  //       vehicleId = res.body.id;
-  //       return done();
-  //     });
-  // });
+  let vehicleId;
+  test("POST /vehicles", (done) => {
+    request(app)
+      .post("/vehicles")
+      .send({
+        make: "Honda",
+      })
+      .expect((res) => {
+        res.body.make = "Honda";
+      })
+      .end((err, res) => {
+        if (err) return done(err);
+        vehicleId = res.body.id;
+        return done();
+      });
+  });
 
   test("GET /vehicles/:id", (done) => {
     request(app)
@@ -34,13 +34,13 @@ describe("Create and insert Vehicle", () => {
       });
   });
 
-  // test("DELETE /vehicles/:id", (done) => {
-  //   request(app)
-  //     .delete(`/vehicles/${vehicleId}`)
-  //     .expect(204)
-  //     .end((err, res) => {
-  //       if (err) return done(err);
-  //       return done();
-  //     });
-  // });
+  test("DELETE /vehicles/:id", (done) => {
+    request(app)
+      .delete(`/vehicles/${vehicleId}`)
+      .expect(204)
+      .end((err, res) => {
+        if (err) return done(err);
+        return done();
+      });
+  });
 });
