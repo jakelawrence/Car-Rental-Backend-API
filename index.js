@@ -1,6 +1,7 @@
 const express = require("express");
 var sqlite3 = require("sqlite3").verbose();
 var initDB = require("./database/init");
+var endpointReponse = require("./formEndpointResponses");
 var dbQueries = require("./queries.json");
 var db = new sqlite3.Database("./database/database.db");
 
@@ -17,10 +18,7 @@ app.get("/vehicles/:id", (req, res, next) => {
       } else if (!row) {
         res.status(404).send(`Vehicle with id = ${req.params.id} not found.`);
       } else {
-        res.json({
-          id: row.id,
-          make: row.make,
-        });
+        res.json(endpointReponse.formVehicleResponse(row));
       }
     });
   });
@@ -34,10 +32,7 @@ app.get("/drivers/:id", (req, res, next) => {
       } else if (!row) {
         res.status(404).send(`Driver with id = ${req.params.id} not found.`);
       } else {
-        res.json({
-          id: row.id,
-          driverName: row.driverName,
-        });
+        res.json(endpointReponse.formDriverResponse(row));
       }
     });
   });
@@ -51,20 +46,7 @@ app.get("/trips/:id", (req, res, next) => {
       } else if (!row) {
         res.status(404).send(`Trip with id = ${req.params.id} not found.`);
       } else {
-        res.json({
-          id: row.id,
-          status: row.status,
-          startedAt: row.startedAt,
-          expectedReturn: row.expectedReturn,
-          driver: {
-            driverId: row.driverId,
-            driverName: row.driverName,
-          },
-          vehicle: {
-            vehicleId: row.vehicleId,
-            make: row.make,
-          },
-        });
+        res.json(endpointReponse.formTripResponse(row));
       }
     });
   });
@@ -80,10 +62,7 @@ app.post("/vehicles", async (req, res, next) => {
           if (err) {
             res.send("Error encountered while displaying");
           }
-          res.json({
-            id: row.id,
-            make: row.make,
-          });
+          res.json(endpointReponse.formVehicleResponse(row));
         });
       }
     });
@@ -100,10 +79,7 @@ app.post("/drivers", (req, res, next) => {
           if (err) {
             res.send("Error encountered while displaying");
           }
-          res.json({
-            id: row.id,
-            driverName: row.driverName,
-          });
+          res.json(endpointReponse.formDriverResponse(row));
         });
       }
     });
@@ -123,20 +99,7 @@ app.post("/trips", (req, res, next) => {
             if (err) {
               res.send("Error encountered while displaying");
             }
-            res.json({
-              id: row.id,
-              status: row.status,
-              startedAt: row.startedAt,
-              expectedReturn: row.expectedReturn,
-              driver: {
-                driverId: row.driverId,
-                driverName: row.driverName,
-              },
-              vehicle: {
-                vehicleId: row.vehicleId,
-                make: row.make,
-              },
-            });
+            res.json(endpointReponse.formTripResponse(row));
           }
         );
       }
