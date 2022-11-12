@@ -107,4 +107,17 @@ app.post("/trips", (req, res, next) => {
   });
 });
 
-app.listen(3000, function () {});
+app.delete("/vehicles/:id", (req, res, next) => {
+  db.serialize(() => {
+    db.get(dbQueries.vehiclesTable.deleteVehicleByID, [req.params.id], function (err, row) {
+      if (err) {
+        next(err);
+      } else {
+        res.status(204).send();
+      }
+    });
+  });
+});
+
+//export for testing
+module.exports = app;

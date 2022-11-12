@@ -3,7 +3,8 @@
     "createVehicleTable": "CREATE TABLE IF NOT EXISTS vehicle (id INTEGER PRIMARY KEY, make varchar(255) UNIQUE NOT NULL)",
     "getVehicleByID": "SELECT id, make FROM vehicle WHERE id =?",
     "insertVehicle": "INSERT INTO vehicle (make) VALUES(?)",
-    "getVehicleByMake": "SELECT id, make FROM vehicle WHERE make =?"
+    "getVehicleByMake": "SELECT id, make FROM vehicle WHERE make =?",
+    "deleteVehicleByID": "DELETE from vehicle where id =?"
   },
   "driversTable": {
     "createDriverTable": "CREATE TABLE IF NOT EXISTS driver (id INTEGER PRIMARY KEY, driverName varchar(255) UNIQUE NOT NULL)",
@@ -12,7 +13,7 @@
     "getDriverByDriverName": "SELECT id, driverName FROM driver WHERE driverName =?"
   },
   "tripsTable": {
-    "createTripTable": "CREATE TABLE IF NOT EXISTS trip (id INTEGER PRIMARY KEY, status varchar(50) DEFAULT 'active',vehicleId INTEGER,driverId INTEGER,startedAt DATETIME NOT NULL,expectedReturn DATETIME NOT NULL,FOREIGN KEY (vehicleId) REFERENCES vehicle(id), FOREIGN KEY (driverId) REFERENCES driver(id))",
+    "createTripTable": "CREATE TABLE IF NOT EXISTS trip (id INTEGER PRIMARY KEY, status varchar(50) DEFAULT 'active', vehicleId INTEGER, driverId INTEGER, startedAt DATETIME NOT NULL, expectedReturn DATETIME NOT NULL, FOREIGN KEY (vehicleId) REFERENCES vehicle(id), FOREIGN KEY (driverId) REFERENCES driver(id))",
     "getTripByID": "SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make FROM trip t JOIN driver d on d.id = t.driverId JOIN vehicle v on v.id = t.vehicleId WHERE t.id=?",
     "insertTrip": "INSERT INTO trip (vehicleId, driverId, startedAt, expectedReturn) VALUES(?,?,?,?)",
     "getTripByTripData": "SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make FROM trip t JOIN driver d on d.id = t.driverId JOIN vehicle v on v.id = t.vehicleId WHERE t.vehicleId =? and t.status =? and t.driverId =? and t.startedAt =? and t.expectedReturn =?"
