@@ -13,13 +13,15 @@ app.get("/vehicles/:id", (req, res, next) => {
   db.serialize(() => {
     db.get(dbQueries.vehiclesTable.getVehicleByID, [req.params.id], function (err, row) {
       if (err) {
-        res.send("Error encountered while displaying");
-        return console.error(err.message);
+        next(err);
+      } else if (!row) {
+        res.status(404).send(`Vehicle with id = ${req.params.id} not found.`);
+      } else {
+        res.json({
+          id: row.id,
+          make: row.make,
+        });
       }
-      res.json({
-        id: row.id,
-        make: row.make,
-      });
     });
   });
 });
@@ -28,13 +30,15 @@ app.get("/drivers/:id", (req, res, next) => {
   db.serialize(() => {
     db.get(dbQueries.driversTable.getDriverByID, [req.params.id], function (err, row) {
       if (err) {
-        res.send("Error encountered while displaying");
-        return console.error(err.message);
+        next(err);
+      } else if (!row) {
+        res.status(404).send(`Driver with id = ${req.params.id} not found.`);
+      } else {
+        res.json({
+          id: row.id,
+          driverName: row.driverName,
+        });
       }
-      res.json({
-        id: row.id,
-        driverName: row.driverName,
-      });
     });
   });
 });
@@ -43,23 +47,25 @@ app.get("/trips/:id", (req, res, next) => {
   db.serialize(() => {
     db.get(dbQueries.tripsTable.getTripByID, [req.params.id], function (err, row) {
       if (err) {
-        res.send("Error encountered while displaying");
-        return console.error(err.message);
+        next(err);
+      } else if (!row) {
+        res.status(404).send(`Trip with id = ${req.params.id} not found.`);
+      } else {
+        res.json({
+          id: row.id,
+          status: row.status,
+          startedAt: row.startedAt,
+          expectedReturn: row.expectedReturn,
+          driver: {
+            driverId: row.driverId,
+            driverName: row.driverName,
+          },
+          vehicle: {
+            vehicleId: row.vehicleId,
+            make: row.make,
+          },
+        });
       }
-      res.json({
-        id: row.id,
-        status: row.status,
-        startedAt: row.startedAt,
-        expectedReturn: row.expectedReturn,
-        driver: {
-          driverId: row.driverId,
-          driverName: row.driverName,
-        },
-        vehicle: {
-          vehicleId: row.vehicleId,
-          make: row.make,
-        },
-      });
     });
   });
 });
@@ -68,7 +74,7 @@ app.post("/vehicles", async (req, res, next) => {
   db.serialize(() => {
     db.run(dbQueries.vehiclesTable.insertVehicle, [req.body.make], function (err) {
       if (err) {
-        res.status(500).send(err.message);
+        next(err);
       } else {
         db.get(dbQueries.vehiclesTable.getVehicleByMake, [req.body.make], function (err, row) {
           if (err) {
@@ -88,7 +94,7 @@ app.post("/drivers", (req, res, next) => {
   db.serialize(() => {
     db.run(dbQueries.driversTable.insertDriver, [req.body.driverName], function (err) {
       if (err) {
-        res.status(500).send(err.message);
+        next(err);
       } else {
         db.get(dbQueries.driversTable.getDriverByDriverName, [req.body.driverName], function (err, row) {
           if (err) {
