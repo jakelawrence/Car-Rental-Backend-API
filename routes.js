@@ -108,19 +108,28 @@ app.post("/drivers", (req, res, next) => {
 });
 
 app.post("/trips", (req, res, next) => {
-  db.serialize(() => {
-    db.run(dbQueries.insertTrip(req.body), function (err) {
-      if (err) {
-        res.status(500).send(err.message);
-      } else {
-        db.get(dbQueries.getTripByTripData(req.body), function (err, row) {
+  db.get(dbQueries.getTripsByFilteredData({ status: "active", vehicleId: req.body.vehicleId }), function (err, row) {
+    if (err) {
+      res.status(500).send(err.message);
+    } else if (row) {
+      var resJson = endpointReponse.formTripResponse(row);
+      res.status(409).send("There already exists an active trip for " + resJson.vehicle.make);
+    } else {
+      db.serialize(() => {
+        db.run(dbQueries.insertTrip(req.body), function (err) {
           if (err) {
-            res.send("Error encountered while displaying");
+            res.status(500).send(err.message);
+          } else {
+            db.get(dbQueries.getTripByTripData(req.body), function (err, row) {
+              if (err) {
+                res.send("Error encountered while displaying");
+              }
+              res.json(endpointReponse.formTripResponse(row));
+            });
           }
-          res.json(endpointReponse.formTripResponse(row));
         });
-      }
-    });
+      });
+    }
   });
 });
 

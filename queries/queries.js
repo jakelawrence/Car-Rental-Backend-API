@@ -100,8 +100,7 @@ function getTripsByFilteredData(data) {
     FROM trip t 
     JOIN driver d on d.id = t.driverId 
     JOIN vehicle v on v.id = t.vehicleId 
-    WHERE 
-  `;
+    WHERE `;
 
   for (const key of Object.keys(data)) {
     switch (key) {

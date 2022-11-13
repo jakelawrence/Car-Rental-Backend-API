@@ -53,6 +53,9 @@ describe("Create, insert and delete a trip", function () {
   let driverName = "Jake Lawrence";
   let driverId;
 
+  let driverName2 = "Lisa Gulley";
+  let driverId2;
+
   let startedAt = "2022-02-24T14:43:18-08:00";
   let expectedReturn = "2022-03-24T14:43:18-08:00";
   let tripId;
@@ -128,6 +131,32 @@ describe("Create, insert and delete a trip", function () {
     expect(response.body.vehicle.make).toEqual(vehicleMake);
   });
 
+  it("POST /drivers", async function () {
+    const response = await request(app).post("/drivers").send({ driverName: driverName2 });
+
+    expect(response.status).toEqual(200);
+    expect(response.body.driverName).toEqual(driverName2);
+    driverId2 = response.body.id;
+  });
+
+  it("GET /drivers", async function () {
+    const response = await request(app).get(`/drivers/${driverId2}`);
+    expect(response.status).toEqual(200);
+    expect(response.body.id).toEqual(driverId2);
+    expect(response.body.driverName).toEqual(driverName2);
+  });
+
+  it("POST /trips", async function () {
+    const response = await request(app).post("/trips").send({
+      driverId: driverId2,
+      vehicleId: vehicleId,
+      startedAt: startedAt,
+      expectedReturn: expectedReturn,
+    });
+
+    expect(response.status).toEqual(409);
+  });
+
   it("DELETE /trips", async function () {
     const response = await request(app).delete(`/trips/${tripId}`);
     expect(response.status).toEqual(204);
@@ -138,6 +167,10 @@ describe("Create, insert and delete a trip", function () {
   });
   it("DELETE /drivers", async function () {
     const response = await request(app).delete(`/drivers/${driverId}`);
+    expect(response.status).toEqual(204);
+  });
+  it("DELETE /drivers", async function () {
+    const response = await request(app).delete(`/drivers/${driverId2}`);
     expect(response.status).toEqual(204);
   });
 });
