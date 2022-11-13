@@ -8,20 +8,20 @@ function createVehicleTable() {
   `;
 }
 
-function getVehicleByID(id) {
-  return `SELECT id, make FROM vehicle WHERE id =${id}`;
+function getVehicleByID(data) {
+  return `SELECT id, make FROM vehicle WHERE id =${data.id}`;
 }
 
-function insertVehicle(make) {
-  return `INSERT INTO vehicle (make) VALUES('${make}')`;
+function insertVehicle(data) {
+  return `INSERT INTO vehicle (make) VALUES('${data.make}')`;
 }
 
-function getVehicleByMake(make) {
-  return `SELECT id, make FROM vehicle WHERE make ='${make}'`;
+function getVehicleByMake(data) {
+  return `SELECT id, make FROM vehicle WHERE make ='${data.make}'`;
 }
 
-function deleteVehicleByID(id) {
-  return `DELETE from vehicle where id =${id}`;
+function deleteVehicleByID(data) {
+  return `DELETE from vehicle where id =${data.id}`;
 }
 
 //driver queries
@@ -29,25 +29,25 @@ function createDriverTable() {
   return `
     CREATE TABLE IF NOT EXISTS driver (
       id INTEGER PRIMARY KEY, 
-      make varchar(255) UNIQUE NOT NULL
+      driverName varchar(255) UNIQUE NOT NULL
     )
   `;
 }
 
-function getDriverByID(id) {
-  return `SELECT id, make FROM driver WHERE id =${id}`;
+function getDriverByID(data) {
+  return `SELECT id, driverName FROM driver WHERE id =${data.id}`;
 }
 
-function insertDriver(driverName) {
-  return `INSERT INTO driver (driverName) VALUES('${driverName}')`;
+function insertDriver(data) {
+  return `INSERT INTO driver (driverName) VALUES('${data.driverName}')`;
 }
 
-function getDriverByDriverName(driverName) {
-  return `SELECT id, driverName FROM driver WHERE driverName ='${driverName}'`;
+function getDriverByDriverName(data) {
+  return `SELECT id, driverName FROM driver WHERE driverName ='${data.driverName}'`;
 }
 
-function deleteDriverByID(id) {
-  return `DELETE from driver where id =${id}`;
+function deleteDriverByID(data) {
+  return `DELETE from driver where id =${data.id}`;
 }
 
 function createTripTable() {
@@ -64,33 +64,50 @@ function createTripTable() {
     )
   `;
 }
-function getTripByID(id) {
+function getTripByID(data) {
   return `
     SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
     FROM trip t 
     JOIN driver d on d.id = t.driverId 
     JOIN vehicle v on v.id = t.vehicleId 
-    WHERE t.id=${id}
+    WHERE t.id=${data.id}
   `;
 }
-function insertTrip(vehicleId, driverId, startedAt, expectedReturn) {
+function insertTrip(data) {
   return `
-    INSERT INTO trip (vehicleId, driverId, startedAt, expectedReturn) 
-    VALUES('${vehicleId}','${driverId}','${startedAt}','${expectedReturn}')
+    INSERT INTO trip (vehicleId, status, driverId, startedAt, expectedReturn) 
+    VALUES(${data.vehicleId},'${data.status ? data.status : "active"}',${data.driverId},'${data.startedAt}','${data.expectedReturn}')
   `;
 }
-function getTripByTripData(vehicleId, status, driverId, startedAt, expectedReturn) {
+function getTripByTripData(data) {
   return `
     SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
     FROM trip t 
     JOIN driver d on d.id = t.driverId 
     JOIN vehicle v on v.id = t.vehicleId 
-    WHERE t.vehicleId ='${vehicleId}' and t.status ='${status}' and t.driverId ='${driverId}' 
-    and t.startedAt ='${startedAt}' and t.expectedReturn ='${expectedReturn}'
+    WHERE t.vehicleId =${data.vehicleId} and t.driverId =${data.driverId} 
+    and t.startedAt ='${data.startedAt}' and t.expectedReturn ='${data.expectedReturn}'
   `;
 }
-function deleteTripByID(id) {
-  return `DELETE from trip where id =${id}`;
+function deleteTripByID(data) {
+  return `DELETE from trip where id =${data.id}`;
+}
+
+function getTripsByFilteredData(data) {
+  var filters = [];
+  var query = "select * from trip where ";
+  if (data.status) {
+    filters.push(`status = '${data.status}'`);
+  }
+  if (data.vehicleId) {
+    filters.push(`vehicleId = ${data.vehicleId}`);
+  }
+  if (data.driverId) {
+    filters.push(`driverId = ${data.driverId}`);
+  }
+  filters.join(" and ");
+  query = query.concat(filters);
+  return query;
 }
 
 module.exports = {
@@ -109,4 +126,5 @@ module.exports = {
   insertTrip,
   getTripByTripData,
   deleteTripByID,
+  getTripsByFilteredData,
 };

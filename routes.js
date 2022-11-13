@@ -13,12 +13,11 @@ app.use(express.json());
 
 app.get("/vehicles/:id", (req, res, next) => {
   db.serialize(() => {
-    db.get(dbQueries.getVehicleByID(req.params.id), function (err, row) {
+    db.get(dbQueries.getVehicleByID(req.params), function (err, row) {
       if (err) {
         next(err);
       } else if (!row) {
-        console.log(row);
-        res.status(404).send(`Vehicle with id = ${req.params.id} not found.`);
+        res.status(404).send(`Vehicle with id = ${req.params} not found.`);
       } else {
         res.json(endpointReponse.formVehicleResponse(row));
       }
@@ -28,11 +27,11 @@ app.get("/vehicles/:id", (req, res, next) => {
 
 app.get("/drivers/:id", (req, res, next) => {
   db.serialize(() => {
-    db.get(dbQueries.getDriverByID(req.params.id), function (err, row) {
+    db.get(dbQueries.getDriverByID(req.params), function (err, row) {
       if (err) {
         next(err);
       } else if (!row) {
-        res.status(404).send(`Driver with id = ${req.params.id} not found.`);
+        res.status(404).send(`Driver with id = ${req.params} not found.`);
       } else {
         res.json(endpointReponse.formDriverResponse(row));
       }
@@ -42,11 +41,11 @@ app.get("/drivers/:id", (req, res, next) => {
 
 app.get("/trips/:id", (req, res, next) => {
   db.serialize(() => {
-    db.get(dbQueries.getTripByID(req.params.id), function (err, row) {
+    db.get(dbQueries.getTripByID(req.params), function (err, row) {
       if (err) {
         next(err);
       } else if (!row) {
-        res.status(404).send(`Trip with id = ${req.params.id} not found.`);
+        res.status(404).send(`Trip with id = ${req.params} not found.`);
       } else {
         res.json(endpointReponse.formTripResponse(row));
       }
@@ -56,11 +55,11 @@ app.get("/trips/:id", (req, res, next) => {
 
 app.post("/vehicles", async (req, res, next) => {
   db.serialize(() => {
-    db.run(dbQueries.insertVehicle(req.body.make), function (err) {
+    db.run(dbQueries.insertVehicle(req.body), function (err) {
       if (err) {
         next(err);
       } else {
-        db.get(dbQueries.getVehicleByMake(req.body.make), function (err, row) {
+        db.get(dbQueries.getVehicleByMake(req.body), function (err, row) {
           if (err) {
             res.send("Error encountered while displaying");
           }
@@ -73,11 +72,11 @@ app.post("/vehicles", async (req, res, next) => {
 
 app.post("/drivers", (req, res, next) => {
   db.serialize(() => {
-    db.run(dbQueries.insertDriver(req.body.driverName), function (err) {
+    db.run(dbQueries.insertDriver(req.body), function (err) {
       if (err) {
         next(err);
       } else {
-        db.get(dbQueries.getDriverByDriverName(req.body.driverName), function (err, row) {
+        db.get(dbQueries.getDriverByDriverName(req.body), function (err, row) {
           if (err) {
             res.send("Error encountered while displaying");
           }
@@ -90,19 +89,16 @@ app.post("/drivers", (req, res, next) => {
 
 app.post("/trips", (req, res, next) => {
   db.serialize(() => {
-    db.run(dbQueries.tripsTable.insertTrip(req.body.vehicleId, req.body.driverId, req.body.startedAt, req.body.expectedReturn), function (err) {
+    db.run(dbQueries.insertTrip(req.body), function (err) {
       if (err) {
         res.status(500).send(err.message);
       } else {
-        db.get(
-          dbQueries.getTripByTripData(req.body.vehicleId, req.body.status, req.body.driverId, req.body.startedAt, req.body.expectedReturn),
-          function (err, row) {
-            if (err) {
-              res.send("Error encountered while displaying");
-            }
-            res.json(endpointReponse.formTripResponse(row));
+        db.get(dbQueries.getTripByTripData(req.body), function (err, row) {
+          if (err) {
+            res.send("Error encountered while displaying");
           }
-        );
+          res.json(endpointReponse.formTripResponse(row));
+        });
       }
     });
   });
@@ -110,7 +106,7 @@ app.post("/trips", (req, res, next) => {
 
 app.delete("/vehicles/:id", (req, res, next) => {
   db.serialize(() => {
-    db.get(dbQueries.deleteVehicleByID(req.params.id), function (err, row) {
+    db.get(dbQueries.deleteVehicleByID(req.params), function (err, row) {
       if (err) {
         next(err);
       } else {
@@ -122,7 +118,7 @@ app.delete("/vehicles/:id", (req, res, next) => {
 
 app.delete("/drivers/:id", (req, res, next) => {
   db.serialize(() => {
-    db.get(dbQueries.deleteDriverByID(req.params.id), function (err, row) {
+    db.get(dbQueries.deleteDriverByID(req.params), function (err, row) {
       if (err) {
         next(err);
       } else {
@@ -134,7 +130,7 @@ app.delete("/drivers/:id", (req, res, next) => {
 
 app.delete("/trips/:id", (req, res, next) => {
   db.serialize(() => {
-    db.get(dbQueries.deleteTripByID(req.params.id), function (err, row) {
+    db.get(dbQueries.deleteTripByID(req.params), function (err, row) {
       if (err) {
         next(err);
       } else {
