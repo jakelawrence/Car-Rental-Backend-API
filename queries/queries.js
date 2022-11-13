@@ -95,18 +95,30 @@ function deleteTripByID(data) {
 
 function getTripsByFilteredData(data) {
   var filters = [];
-  var query = "select * from trip where ";
-  if (data.status) {
-    filters.push(`status = '${data.status}'`);
+  var query = `
+    SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
+    FROM trip t 
+    JOIN driver d on d.id = t.driverId 
+    JOIN vehicle v on v.id = t.vehicleId 
+    WHERE 
+  `;
+
+  for (const key of Object.keys(data)) {
+    switch (key) {
+      case "status":
+        filters.push(`status = '${data[key]}'`);
+        break;
+      case "vehicleId":
+        filters.push(`vehicleId = ${data[key]}`);
+        break;
+      case "driverId":
+        filters.push(`driverId = ${data[key]}`);
+        break;
+      default:
+        throw new Error(key + " is not a valid filter type.");
+    }
   }
-  if (data.vehicleId) {
-    filters.push(`vehicleId = ${data.vehicleId}`);
-  }
-  if (data.driverId) {
-    filters.push(`driverId = ${data.driverId}`);
-  }
-  filters.join(" and ");
-  query = query.concat(filters);
+  query = query.concat(filters.join(" and "));
   return query;
 }
 

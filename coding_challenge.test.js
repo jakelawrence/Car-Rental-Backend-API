@@ -115,6 +115,19 @@ describe("Create, insert and delete a trip", function () {
     expect(response.body.vehicle.vehicleId).toEqual(vehicleId);
     expect(response.body.vehicle.make).toEqual(vehicleMake);
   });
+
+  it("GET /trips?status=active", async function () {
+    const response = await request(app).get(`/trips?status=active`);
+    console.log(response.body);
+    expect(response.status).toEqual(200);
+    expect(response.body.startedAt).toEqual(startedAt);
+    expect(response.body.expectedReturn).toEqual(expectedReturn);
+    expect(response.body.driver.driverId).toEqual(driverId);
+    expect(response.body.driver.driverName).toEqual(driverName);
+    expect(response.body.vehicle.vehicleId).toEqual(vehicleId);
+    expect(response.body.vehicle.make).toEqual(vehicleMake);
+  });
+
   it("DELETE /trips", async function () {
     const response = await request(app).delete(`/trips/${tripId}`);
     expect(response.status).toEqual(204);
