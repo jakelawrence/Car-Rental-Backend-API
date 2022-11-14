@@ -253,7 +253,7 @@ For unit and integration testing, clone repo and execute:
 ```
 
 *Output*
-```json
+``json
 
 {
     id: 1,
@@ -269,7 +269,7 @@ For unit and integration testing, clone repo and execute:
         make: "Honda",
     },
 }
-```
+``
 
 
 
