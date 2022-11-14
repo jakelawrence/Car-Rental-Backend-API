@@ -5,225 +5,120 @@ var dbQueries = require("./queries/queries");
 var db = new sqlite3.Database("./database/database.db");
 
 //init database tables (if not already created)
-db.run(dbQueries.createVehicleTable());
-db.run(dbQueries.createDriverTable());
-db.run(dbQueries.createTripTable());
+db.run(`
+    CREATE TABLE IF NOT EXISTS vehicle (
+      id INTEGER PRIMARY KEY, 
+      make varchar(255) UNIQUE NOT NULL
+    )
+`);
+db.run(`
+    CREATE TABLE IF NOT EXISTS driver (
+      id INTEGER PRIMARY KEY, 
+      driverName varchar(255) UNIQUE NOT NULL
+    )
+`);
+db.run(`
+    CREATE TABLE IF NOT EXISTS trip (
+      id INTEGER PRIMARY KEY, 
+      status varchar(50) DEFAULT 'active', 
+      vehicleId INTEGER, 
+      driverId INTEGER, 
+      startedAt DATETIME NOT NULL, 
+      expectedReturn DATETIME NOT NULL, 
+      FOREIGN KEY (vehicleId) REFERENCES vehicle(id), 
+      FOREIGN KEY (driverId) REFERENCES driver(id)
+    )
+`);
 
 const app = express();
 app.use(express.json());
 
 //GET vehicle by id
-app.get("/vehicles/:id", (req, res, next) => {
-  db.serialize(() => {
-    //query for vehicles with :id
-    db.get(dbQueries.getVehicleByID(req.params), function (err, row) {
-      if (err) {
-        next(err);
-      }
-      //no vehicles with :id found
-      else if (!row) {
-        res.status(404).send(`Vehicle with id = ${req.params} not found.`);
-      }
-      //return vehicle to user
-      else {
-        res.json(endpointReponse.formVehicleResponse(row));
-      }
-    });
-  });
+app.get("/vehicles/:id", async (req, res, next) => {
+  var vehicle = await dbQueries.getVehicle(req.params.id, db);
+  res.json(endpointReponse.formVehicleResponse(vehicle));
 });
 
 //GET driver by id
-app.get("/drivers/:id", (req, res, next) => {
-  db.serialize(() => {
-    //query for drivers with :id
-    db.get(dbQueries.getDriverByID(req.params), function (err, row) {
-      if (err) {
-        next(err);
-      }
-      //no drivers with :id found
-      else if (!row) {
-        res.status(404).send(`Driver with id = ${req.params} not found.`);
-      }
-      //return driver to user
-      else {
-        res.json(endpointReponse.formDriverResponse(row));
-      }
-    });
-  });
+app.get("/drivers/:id", async (req, res, next) => {
+  var driver = await dbQueries.getDriver(req.params.id, db);
+  res.json(endpointReponse.formDriverResponse(driver));
 });
 
 //GET trip by id
-app.get("/trips/:id", (req, res, next) => {
-  db.serialize(() => {
-    //query for trips with :id
-    db.get(dbQueries.getTripByID(req.params), function (err, row) {
-      if (err) {
-        next(err);
-      }
-      //no trips with :id found
-      else if (!row) {
-        res.status(404).send(`Trip with id = ${req.params} not found.`);
-      }
-      //return trip to user
-      else {
-        res.json(endpointReponse.formTripResponse(row));
-      }
-    });
-  });
+app.get("/trips/:id", async (req, res, next) => {
+  var trip = await dbQueries.getTrip(req.params.id, db);
+  res.json(endpointReponse.formTripResponse(trip));
 });
 
 //GET trip by filtered data
-app.get("/trips", (req, res, next) => {
-  db.serialize(() => {
-    //parse filters and create query for filtered data
-    //if an invalid filter is passed, return error back to user
-    try {
-      var query = dbQueries.getTripsByFilteredData(req.query);
-    } catch (err) {
-      //Bad request
-      res.status(400).send(err.message);
-      return;
-    }
-    //query for trips using filter(s)
-    db.all(query, function (err, rows) {
-      if (err) {
-        next(err);
-      } else {
-        var filteredTrips = [];
-        rows.forEach((row) => {
-          filteredTrips.push(endpointReponse.formTripResponse(row));
-        });
-        res.json(filteredTrips);
-      }
-    });
+app.get("/trips", async (req, res, next) => {
+  var filteredTrips = [];
+  var trips = await dbQueries.filterTrips(req.query, db);
+  //for each trip returned
+  trips.forEach((trip) => {
+    filteredTrips.push(endpointReponse.formTripResponse(trip));
   });
+  res.json(filteredTrips);
 });
 
+//insert vehicle
 app.post("/vehicles", async (req, res, next) => {
-  db.serialize(() => {
-    db.run(dbQueries.insertVehicle(req.body), function (err) {
-      if (err) {
-        next(err);
-      } else {
-        db.get(dbQueries.getVehicleByMake(req.body), function (err, row) {
-          if (err) {
-            res.send("Error encountered while displaying");
-          }
-          res.json(endpointReponse.formVehicleResponse(row));
-        });
-      }
-    });
-  });
+  var vehicle = await dbQueries.insertVehicle(req.body, db);
+  res.json(endpointReponse.formVehicleResponse(vehicle));
 });
 
-app.post("/drivers", (req, res, next) => {
-  db.serialize(() => {
-    db.run(dbQueries.insertDriver(req.body), function (err) {
-      if (err) {
-        next(err);
-      } else {
-        db.get(dbQueries.getDriverByDriverName(req.body), function (err, row) {
-          if (err) {
-            res.send("Error encountered while displaying");
-          }
-          res.json(endpointReponse.formDriverResponse(row));
-        });
-      }
-    });
-  });
+//insert driver
+app.post("/drivers", async (req, res, next) => {
+  var driver = await dbQueries.insertDriver(req.body, db);
+  res.json(endpointReponse.formDriverResponse(driver));
 });
 
-app.post("/trips", (req, res, next) => {
-  db.get(dbQueries.getTripsByFilteredData({ status: "active", vehicleId: req.body.vehicleId }), function (err, row) {
-    if (err) {
-      res.status(500).send(err.message);
-    }
-    //if there is already an active trip assigned to vehicle
-    else if (row) {
-      var resJson = endpointReponse.formTripResponse(row);
-      res.status(409).send("There already exists an active trip for " + resJson.vehicle.make);
-    } else {
-      db.serialize(() => {
-        //create trip
-        db.run(dbQueries.insertTrip(req.body), function (err) {
-          if (err) {
-            res.status(500).send(err.message);
-          } else {
-            //return trip to user
-            db.get(dbQueries.getTripsByFilteredData(req.body), function (err, row) {
-              if (err) {
-                res.status(500).send(err.message);
-              }
-              res.json(endpointReponse.formTripResponse(row));
-            });
-          }
-        });
-      });
-    }
-  });
+//insert trip
+app.post("/trips", async (req, res, next) => {
+  var activeTripsWithVehicle = await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId }, db);
+  if (activeTripsWithVehicle.length > 0) {
+    res.status(409).send("There already exists an active trip for this vehicle");
+  } else {
+    var trip = await dbQueries.insertTrip(req.body, db);
+    res.json(endpointReponse.formTripResponse(trip));
+  }
 });
 
-app.put("/trips", (req, res, next) => {
+//update trip
+app.put("/trips", async (req, res, next) => {
   //find if trip with given tripId exists
-  db.get(dbQueries.getTripByID({ id: req.body.tripId }), function (err, row) {
-    if (err) {
-      res.status(500).send(err.message);
+  var tripToBeUpdated = await dbQueries.getTrip(req.body.tripId, db);
+  if (tripToBeUpdated) {
+    if (req.params.status && req.params.status == "active") {
+      var activeTripsWithVehicle = await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId, notId: req.body.tripId }, db);
+      if (activeTripsWithVehicle.length > 0) {
+        res.status(409).send("There already exists an active trip for this vehicle.");
+        return;
+      }
     }
-    //trip with tripId does not exist
-    else if (!row) {
-      res.status(404).send(`Trip with id = ${req.body.tripId} not found.`);
-    } else {
-      console.log(dbQueries.updateTrip(req.body));
-      db.run(dbQueries.updateTrip(req.body), function (err) {
-        if (err) {
-          res.status(500).send(err.message);
-        } else {
-          db.get(dbQueries.getTripByID({ id: req.body.tripId }), function (err, row) {
-            if (err) {
-              res.status(500).send(err.message);
-            }
-            res.json(endpointReponse.formTripResponse(row));
-          });
-        }
-      });
-    }
-  });
+    await dbQueries.updateTrip(req.body, db);
+    var updatedTrip = await dbQueries.getTrip(req.body.tripId, db);
+    res.json(endpointReponse.formTripResponse(updatedTrip));
+  }
 });
 
-app.delete("/vehicles/:id", (req, res, next) => {
-  db.serialize(() => {
-    db.get(dbQueries.deleteVehicleByID(req.params), function (err, row) {
-      if (err) {
-        next(err);
-      } else {
-        res.status(204).send();
-      }
-    });
-  });
+//delete vehicle
+app.delete("/vehicles/:id", async (req, res, next) => {
+  var resMsg = await dbQueries.deleteVehicle(req.params, db);
+  res.status(204).send(resMsg);
 });
 
-app.delete("/drivers/:id", (req, res, next) => {
-  db.serialize(() => {
-    db.get(dbQueries.deleteDriverByID(req.params), function (err, row) {
-      if (err) {
-        next(err);
-      } else {
-        res.status(204).send();
-      }
-    });
-  });
+//delete driver
+app.delete("/drivers/:id", async (req, res, next) => {
+  var resMsg = await dbQueries.deleteDriver(req.params, db);
+  res.status(204).send(resMsg);
 });
 
-app.delete("/trips/:id", (req, res, next) => {
-  db.serialize(() => {
-    db.get(dbQueries.deleteTripByID(req.params), function (err, row) {
-      if (err) {
-        next(err);
-      } else {
-        res.status(204).send();
-      }
-    });
-  });
+//delete trip
+app.delete("/trips/:id", async (req, res, next) => {
+  var resMsg = await dbQueries.deleteTrip(req.params, db);
+  res.status(204).send(resMsg);
 });
 
 //export for testing

@@ -1,179 +1,292 @@
-//vehicle queries
-function createVehicleTable() {
-  return `
-    CREATE TABLE IF NOT EXISTS vehicle (
-      id INTEGER PRIMARY KEY, 
-      make varchar(255) UNIQUE NOT NULL
-    )
-  `;
+function getVehicle(vehicleId, db) {
+  return new Promise((resolve, reject) => {
+    var query = `SELECT id, make FROM vehicle WHERE id =${vehicleId}`;
+    db.serialize(() => {
+      //query for drivers with :id
+      db.get(query, function (err, row) {
+        if (err) {
+          reject(err);
+        }
+        //no drivers with :id found
+        else if (!row) {
+          reject(`Vehicle with id = ${vehicleId} not found.`);
+        }
+        //return driver to user
+        else {
+          resolve(row);
+        }
+      });
+    });
+  });
 }
 
-function getVehicleByID(data) {
-  return `SELECT id, make FROM vehicle WHERE id =${data.id}`;
+function getDriver(driverId, db) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      //query for drivers with :id
+      db.get(`SELECT id, driverName FROM driver WHERE id =${driverId}`, function (err, row) {
+        if (err) {
+          reject(err);
+        }
+        //no drivers with :id found
+        else if (!row) {
+          reject(`Driver with id = ${driverId} not found.`);
+        }
+        //return driver to user
+        else {
+          resolve(row);
+        }
+      });
+    });
+  });
 }
 
-function insertVehicle(data) {
-  return `INSERT INTO vehicle (make) VALUES('${data.make}')`;
+function getTrip(tripId, db) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      //query for trip with :id
+      db.get(
+        `
+        SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
+        FROM trip t 
+        JOIN driver d on d.id = t.driverId 
+        JOIN vehicle v on v.id = t.vehicleId 
+        WHERE t.id=${tripId}
+        `,
+        function (err, row) {
+          if (err) {
+            reject(err);
+          }
+          //no trip with :id found
+          else if (!row) {
+            reject(`Trip with id = ${tripId} not found.`);
+          }
+          //return trip to user
+          else {
+            resolve(row);
+          }
+        }
+      );
+    });
+  });
 }
 
-function getVehicleByMake(data) {
-  return `SELECT id, make FROM vehicle WHERE make ='${data.make}'`;
+function insertVehicle(data, db) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run(`INSERT INTO vehicle (make) VALUES('${data.make}')`, function (err) {
+        if (err) {
+          next(err);
+        } else {
+          db.get(`SELECT id, make FROM vehicle WHERE make ='${data.make}'`, function (err, row) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(row);
+            }
+          });
+        }
+      });
+    });
+  });
 }
 
-function deleteVehicleByID(data) {
-  return `DELETE from vehicle where id =${data.id}`;
+function insertDriver(data, db) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run(`INSERT INTO driver (driverName) VALUES('${data.driverName}')`, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          db.get(`SELECT id, driverName FROM driver WHERE driverName ='${data.driverName}'`, function (err, row) {
+            if (err) {
+              reject("Error encountered while displaying");
+            }
+            resolve(row);
+          });
+        }
+      });
+    });
+  });
 }
 
-//driver queries
-function createDriverTable() {
-  return `
-    CREATE TABLE IF NOT EXISTS driver (
-      id INTEGER PRIMARY KEY, 
-      driverName varchar(255) UNIQUE NOT NULL
-    )
-  `;
+function insertTrip(data, db) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      //create trip
+      db.run(
+        `
+      INSERT INTO trip (vehicleId, status, driverId, startedAt, expectedReturn) 
+      VALUES(${data.vehicleId},'${data.status ? data.status : "active"}',${data.driverId},'${data.startedAt}','${data.expectedReturn}')
+      `,
+        function (err) {
+          if (err) {
+            reject(err.message);
+          } else {
+            //return trip to user
+            db.get(
+              `
+            SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
+            FROM trip t 
+            JOIN driver d on d.id = t.driverId 
+            JOIN vehicle v on v.id = t.vehicleId 
+            WHERE t.driverId = ${data.driverId} and t.vehicleId = ${data.vehicleId} 
+            and t.startedAt = '${data.startedAt}' and t.expectedReturn = '${data.expectedReturn}'
+            `,
+              function (err, row) {
+                if (err) {
+                  reject(err.message);
+                } else {
+                  resolve(row);
+                }
+              }
+            );
+          }
+        }
+      );
+    });
+  });
 }
 
-function getDriverByID(data) {
-  return `SELECT id, driverName FROM driver WHERE id =${data.id}`;
+function deleteVehicle(data, db) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.get(`DELETE from vehicle where id =${data.id}`, function (err, row) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(`Vehicle with id = ${data.id} has been deleted.`);
+        }
+      });
+    });
+  });
 }
 
-function insertDriver(data) {
-  return `INSERT INTO driver (driverName) VALUES('${data.driverName}')`;
+function deleteDriver(data, db) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.get(`DELETE from driver where id =${data.id}`, function (err, row) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(`Driver with id = ${data.id} has been deleted.`);
+        }
+      });
+    });
+  });
 }
 
-function getDriverByDriverName(data) {
-  return `SELECT id, driverName FROM driver WHERE driverName ='${data.driverName}'`;
+function deleteTrip(data, db) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.get(`DELETE from trip where id =${data.id}`, function (err, row) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(`Trip with id = ${data.id} has been deleted.`);
+        }
+      });
+    });
+  });
 }
-
-function deleteDriverByID(data) {
-  return `DELETE from driver where id =${data.id}`;
-}
-
-function createTripTable() {
-  return `
-    CREATE TABLE IF NOT EXISTS trip (
-      id INTEGER PRIMARY KEY, 
-      status varchar(50) DEFAULT 'active', 
-      vehicleId INTEGER, 
-      driverId INTEGER, 
-      startedAt DATETIME NOT NULL, 
-      expectedReturn DATETIME NOT NULL, 
-      FOREIGN KEY (vehicleId) REFERENCES vehicle(id), 
-      FOREIGN KEY (driverId) REFERENCES driver(id)
-    )
-  `;
-}
-function getTripByID(data) {
-  return `
-    SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
-    FROM trip t 
-    JOIN driver d on d.id = t.driverId 
-    JOIN vehicle v on v.id = t.vehicleId 
-    WHERE t.id=${data.id}
-  `;
-}
-function insertTrip(data) {
-  return `
-    INSERT INTO trip (vehicleId, status, driverId, startedAt, expectedReturn) 
-    VALUES(${data.vehicleId},'${data.status ? data.status : "active"}',${data.driverId},'${data.startedAt}','${data.expectedReturn}')
-  `;
-}
-function getTripByTripData(data) {
-  return `
-    SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
-    FROM trip t 
-    JOIN driver d on d.id = t.driverId 
-    JOIN vehicle v on v.id = t.vehicleId 
-    WHERE t.vehicleId =${data.vehicleId} and t.driverId =${data.driverId} 
-    and t.startedAt ='${data.startedAt}' and t.expectedReturn ='${data.expectedReturn}'
-  `;
-}
-function deleteTripByID(data) {
-  return `DELETE from trip where id =${data.id}`;
-}
-
-function getTripsByFilteredData(data) {
-  var filters = [];
-  var query = `
+function filterTrips(data, db) {
+  return new Promise((resolve, reject) => {
+    var filters = [];
+    var query = `
     SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
     FROM trip t 
     JOIN driver d on d.id = t.driverId 
     JOIN vehicle v on v.id = t.vehicleId 
     WHERE `;
 
-  for (const key of Object.keys(data)) {
-    switch (key) {
-      case "status":
-        filters.push(`status = '${data[key]}'`);
-        break;
-      case "vehicleId":
-        filters.push(`vehicleId = ${data[key]}`);
-        break;
-      case "driverId":
-        filters.push(`driverId = ${data[key]}`);
-        break;
-      case "startedAt":
-        filters.push(`startedAt = '${data[key]}'`);
-        break;
-      case "expectedReturn":
-        filters.push(`expectedReturn = '${data[key]}'`);
-        break;
-      default:
-        throw new Error(key + " is not a valid filter type.");
+    for (const key of Object.keys(data)) {
+      switch (key) {
+        case "status":
+          filters.push(`status = '${data[key]}'`);
+          break;
+        case "vehicleId":
+          filters.push(`vehicleId = ${data[key]}`);
+          break;
+        case "driverId":
+          filters.push(`driverId = ${data[key]}`);
+          break;
+        case "startedAt":
+          filters.push(`startedAt = '${data[key]}'`);
+          break;
+        case "expectedReturn":
+          filters.push(`expectedReturn = '${data[key]}'`);
+          break;
+        case "notId":
+          filters.push(`id != ${data[key]}`);
+          break;
+        default:
+          reject(key + " is not a valid filter type.");
+      }
     }
-  }
-  query = query.concat(filters.join(" and "));
-  return query;
+    query = query.concat(filters.join(" and "));
+    db.serialize(() => {
+      db.all(query, function (err, rows) {
+        if (err) {
+          next(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  });
 }
 
-function updateTrip(updatedFields) {
-  var query = `UPDATE trip SET `;
-  var updatedFieldsSQL = [];
-  for (const key of Object.keys(updatedFields)) {
-    switch (key) {
-      case "tripId":
-        break;
-      case "status":
-        updatedFieldsSQL.push(`status = '${updatedFields[key]}'`);
-        break;
-      case "startedAt":
-        updatedFieldsSQL.push(`startedAt = '${updatedFields[key]}'`);
-        break;
-      case "expectedReturn":
-        updatedFieldsSQL.push(`expectedReturn = '${updatedFields[key]}'`);
-        break;
-      case "vehicleId":
-        updatedFieldsSQL.push(`vehicleId = ${updatedFields[key]}`);
-        break;
-      case "driverId":
-        updatedFieldsSQL.push(`driverId = ${updatedFields[key]}`);
-        break;
-      default:
-        throw new Error(key + " is not a valid field to update.");
+function updateTrip(updatedFields, db) {
+  return new Promise((resolve, reject) => {
+    var query = `UPDATE trip SET `;
+    var updatedFieldsSQL = [];
+    for (const key of Object.keys(updatedFields)) {
+      switch (key) {
+        case "tripId":
+          break;
+        case "status":
+          updatedFieldsSQL.push(`status = '${updatedFields[key]}'`);
+          break;
+        case "startedAt":
+          updatedFieldsSQL.push(`startedAt = '${updatedFields[key]}'`);
+          break;
+        case "expectedReturn":
+          updatedFieldsSQL.push(`expectedReturn = '${updatedFields[key]}'`);
+          break;
+        case "vehicleId":
+          updatedFieldsSQL.push(`vehicleId = ${updatedFields[key]}`);
+          break;
+        case "driverId":
+          updatedFieldsSQL.push(`driverId = ${updatedFields[key]}`);
+          break;
+        default:
+          throw new Error(key + " is not a valid field to update.");
+      }
     }
-  }
-  query = query.concat(updatedFieldsSQL.join(", "));
-  query = query.concat(` WHERE id = ${updatedFields.tripId}`);
-  return query;
+    query = query.concat(updatedFieldsSQL.join(", "));
+    query = query.concat(` WHERE id = ${updatedFields.tripId}`);
+    db.serialize(() => {
+      db.run(query, function (err, rows) {
+        if (err) {
+          next(err);
+        } else {
+          resolve(`Trip with id = ${updatedFields.tripId} has been updated.`);
+        }
+      });
+    });
+  });
 }
 
 module.exports = {
-  createVehicleTable,
-  getVehicleByID,
+  getVehicle,
   insertVehicle,
-  getVehicleByMake,
-  deleteVehicleByID,
-  createDriverTable,
-  getDriverByID,
+  deleteVehicle,
+  getDriver,
   insertDriver,
-  getDriverByDriverName,
-  deleteDriverByID,
-  createTripTable,
-  getTripByID,
+  deleteDriver,
+  getTrip,
   insertTrip,
-  getTripByTripData,
-  deleteTripByID,
-  getTripsByFilteredData,
+  deleteTrip,
+  filterTrips,
   updateTrip,
 };

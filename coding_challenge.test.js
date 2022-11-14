@@ -151,7 +151,7 @@ describe("Create, insert and delete a trip", function () {
         tripId: trip.id,
         status: "inactive",
       });
-      console.log(response.body);
+
       expect(response.status).toEqual(200);
       expect(response.body.status).toEqual("inactive");
       expect(response.body.startedAt).toEqual(trip.startedAt);
@@ -163,7 +163,7 @@ describe("Create, insert and delete a trip", function () {
     });
   });
   it("GET /trips", async function () {
-    const response = await request(app).get(`/trips?status=active`);
+    const response = await request(app).get(`/trips?status=inactive`);
     expect(response.status).toEqual(200);
   });
   trips.forEach((trip) => {
