@@ -6,20 +6,17 @@ Your local car sharing company is looking to create an application that can help
 2. Return a list of active vehicles on the road and their driver
 
 
-## Deployment
+## Install
 
-To deploy this project, clone repo and execute:
+    npm install
 
-```bash
-  npm install
-  npm start
-```
+## Run the app
 
-For unit and integration testing, clone repo and execute:
-```bash
-  npm install
-  npm test
-```
+    npm start
+
+## Run unit and integration tests
+
+    npm test
 
 ## API Reference
 
