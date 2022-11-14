@@ -18,9 +18,9 @@ Your local car sharing company is looking to create an application that can help
 
     npm test
 
-## API Reference
+# API Reference
 
-#### Get vehicle
+### Get vehicle
 
 `GET /vehicles/${id}`
 
@@ -28,7 +28,7 @@ Your local car sharing company is looking to create an application that can help
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of vehicle to fetch |
 
-#### Get driver
+### Get driver
 
 `GET /drivers/${id}`
 
@@ -36,7 +36,7 @@ Your local car sharing company is looking to create an application that can help
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of driver to fetch |
 
-#### Get trip
+### Get trip
 
 `GET /trips/${id}`
 
@@ -44,7 +44,7 @@ Your local car sharing company is looking to create an application that can help
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of trip to fetch |
 
-#### Filter trips *(Pass filters using query parameters in URL)*
+### Filter trips *(Pass filters using query parameters in URL)*
 
 `GET /trips/?status=active|inactive`
 
@@ -54,17 +54,23 @@ Your local car sharing company is looking to create an application that can help
 | `startedAt`      | `date` | Filter by startedAt of trip |
 | `expectedReturn`      | `date` | Filter by expectedReturn of trip |
 
+### Create vehicle
+
 `POST /vehicles`
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `make` | `string` | **Required**. Make of the car to be created |
 
+### Create driver
+
 `POST /drivers`
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `driverName` | `string` | **Required**. Name of the driver to be created |
+
+### Create trip
 
 `POST /trips`
 
@@ -76,6 +82,8 @@ Your local car sharing company is looking to create an application that can help
 | `expectedReturn` | `date` | **Required**. Expected return of vehicle |
 | `status` | `string` | Current status of trip (active or inactive) |
 
+### Update trip
+
 `PUT /trips`
 
 | Parameter | Type     | Description                |
@@ -85,7 +93,7 @@ Your local car sharing company is looking to create an application that can help
 | `expectedReturn` | `date` | Expected return of vehicle |
 | `status` | `string` | Current status of trip (active or inactive) |
 
-#### Delete vehicle
+### Delete vehicle
 
 `GET /vehicles/${id}`
 
@@ -94,7 +102,7 @@ Your local car sharing company is looking to create an application that can help
 | `id`      | `int` | **Required**. Id of vehicle to delete |
 
 
-#### Delete driver
+### Delete driver
 
 `GET /drivers/${id}`
 
@@ -102,7 +110,7 @@ Your local car sharing company is looking to create an application that can help
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of driver to delete |
 
-#### Delete trip
+### Delete trip
 
 `GET /trips/${id}`
 
@@ -114,14 +122,14 @@ Your local car sharing company is looking to create an application that can help
 
 ***POST /vehicles***
 
-*Request*
+### Request
 ```javascript
 {
     make: "Honda",
 }
 ```
 
-*Response*
+### Response
 ```javascript
 
 {
@@ -131,7 +139,7 @@ Your local car sharing company is looking to create an application that can help
 ```
 ***GET /vehicles/1***
 
-*Response*
+### Response
 ```javascript
 {
     id: 1,
@@ -141,14 +149,14 @@ Your local car sharing company is looking to create an application that can help
 
 ***POST /drivers***
 
-*Request*
+### Request
 ```javascript
 {
     driverName: "John Doe",
 }
 ```
 
-*Response*
+### Response
 ```javascript
 
 {
@@ -158,7 +166,7 @@ Your local car sharing company is looking to create an application that can help
 ```
 ***GET /driver/1***
 
-*Response*
+### Response
 ```javascript
 {
     id: 1,
@@ -168,7 +176,7 @@ Your local car sharing company is looking to create an application that can help
 
 ***POST /trips***
 
-*Request*
+### Request
 ```javascript
 {
 
@@ -179,7 +187,7 @@ Your local car sharing company is looking to create an application that can help
 }
 ```
 
-*Response*
+### Response
 ```javascript
 
 {
@@ -199,7 +207,7 @@ Your local car sharing company is looking to create an application that can help
 ```
 ***GET /trips/1***
 
-*Response*
+### Response
 ```javascript
 {
     id: 1,
@@ -219,7 +227,7 @@ Your local car sharing company is looking to create an application that can help
 
 ***PUT /trips***
 
-*Request*
+### Request
 ```javascript
 {
 
@@ -228,7 +236,7 @@ Your local car sharing company is looking to create an application that can help
 }
 ```
 
-*Response*
+### Response
 ```javascript
 
 {
