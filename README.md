@@ -120,7 +120,7 @@ Your local car sharing company is looking to create an application that can help
 
 # Usage/Examples
 
-`***POST /vehicles***`
+`POST /vehicles`
 
 ### Request
 ```javascript
@@ -137,7 +137,8 @@ Your local car sharing company is looking to create an application that can help
     make: "Honda",
 }
 ```
-***GET /vehicles/1***
+
+`GET /vehicles/1`
 
 ### Response
 ```javascript
@@ -147,7 +148,7 @@ Your local car sharing company is looking to create an application that can help
 }
 ```
 
-***POST /drivers***
+`POST /drivers`
 
 ### Request
 ```javascript
@@ -164,7 +165,8 @@ Your local car sharing company is looking to create an application that can help
     driverName: "John Doe",
 }
 ```
-***GET /driver/1***
+
+`GET /driver/1`
 
 ### Response
 ```javascript
@@ -174,7 +176,7 @@ Your local car sharing company is looking to create an application that can help
 }
 ```
 
-***POST /trips***
+`POST /trips`
 
 ### Request
 ```javascript
@@ -205,7 +207,8 @@ Your local car sharing company is looking to create an application that can help
     },
 }
 ```
-***GET /trips/1***
+
+`GET /trips/1`
 
 ### Response
 ```javascript
@@ -225,7 +228,7 @@ Your local car sharing company is looking to create an application that can help
 }
 ```
 
-***PUT /trips***
+`PUT /trips`
 
 ### Request
 ```javascript
