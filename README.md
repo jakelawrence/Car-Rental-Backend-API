@@ -58,6 +58,11 @@ For unit and integration testing, clone repo and execute:
 ```http
   GET /trips/?status=active|inactive
 ```
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `status`      | `int` | Filter by status of trip |
+| `startedAt`      | `date` | Filter by startedAt of trip |
+| `expectedReturn`      | `date` | Filter by expectedReturn of trip |
 
 ```http
   POST /vehicles
