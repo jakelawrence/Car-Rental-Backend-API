@@ -5,17 +5,11 @@ function getVehicle(vehicleId, db) {
     db.serialize(() => {
       //query for drivers with :id
       db.get(query, function (err, row) {
-        if (err) {
-          reject(err);
-        }
+        if (err) reject(err);
         //no drivers with :id found
-        else if (!row) {
-          reject("Vehicle not found.");
-        }
+        else if (!row) reject("Vehicle not found.");
         //return driver to user
-        else {
-          resolve(row);
-        }
+        else resolve(row);
       });
     });
   });
@@ -27,17 +21,11 @@ function getDriver(driverId, db) {
     db.serialize(() => {
       //query for drivers with :id
       db.get(`SELECT id, driverName FROM driver WHERE id =${driverId}`, function (err, row) {
-        if (err) {
-          reject(err);
-        }
+        if (err) reject(err);
         //no drivers with :id found
-        else if (!row) {
-          reject("Driver not found.");
-        }
+        else if (!row) reject("Driver not found.");
         //return driver to user
-        else {
-          resolve(row);
-        }
+        else resolve(row);
       });
     });
   });
@@ -57,17 +45,11 @@ function getTrip(tripId, db) {
         WHERE t.id=${tripId}
         `,
         function (err, row) {
-          if (err) {
-            reject(err);
-          }
+          if (err) reject(err);
           //no trip with :id found
-          else if (!row) {
-            reject("Trip not found.");
-          }
+          else if (!row) reject("Trip not found.");
           //return trip to user
-          else {
-            resolve(row);
-          }
+          else resolve(row);
         }
       );
     });
@@ -83,11 +65,8 @@ function insertVehicle(data, db) {
           reject(err);
         } else {
           db.get(`SELECT id, make FROM vehicle WHERE make ='${data.make}'`, function (err, row) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(row);
-            }
+            if (err) reject(err);
+            else resolve(row);
           });
         }
       });
@@ -104,11 +83,8 @@ function insertDriver(data, db) {
           reject(err);
         } else {
           db.get(`SELECT id, driverName FROM driver WHERE driverName ='${data.driverName}'`, function (err, row) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(row);
-            }
+            if (err) reject(err);
+            else resolve(row);
           });
         }
       });
@@ -141,11 +117,8 @@ function insertTrip(data, db) {
             and t.startedAt = '${data.startedAt}' and t.expectedReturn = '${data.expectedReturn}'
             `,
               function (err, row) {
-                if (err) {
-                  reject(err);
-                } else {
-                  resolve(row);
-                }
+                if (err) reject(err);
+                else resolve(row);
               }
             );
           }
@@ -160,11 +133,8 @@ function deleteVehicle(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.get(`DELETE from vehicle where id =${data.id}`, function (err, row) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(`Vehicle with id = ${data.id} has been deleted.`);
-        }
+        if (err) reject(err);
+        else resolve(`Vehicle with id = ${data.id} has been deleted.`);
       });
     });
   });
@@ -175,11 +145,8 @@ function deleteDriver(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.get(`DELETE from driver where id =${data.id}`, function (err, row) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(`Driver with id = ${data.id} has been deleted.`);
-        }
+        if (err) reject(err);
+        else resolve(`Driver with id = ${data.id} has been deleted.`);
       });
     });
   });
@@ -190,11 +157,8 @@ function deleteTrip(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.get(`DELETE from trip where id =${data.id}`, function (err, row) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(`Trip with id = ${data.id} has been deleted.`);
-        }
+        if (err) reject(err);
+        else resolve(`Trip with id = ${data.id} has been deleted.`);
       });
     });
   });
@@ -241,11 +205,8 @@ function filterTrips(data, db) {
     query = query.concat(filters.join(" and "));
     db.serialize(() => {
       db.all(query, function (err, rows) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
+        if (err) reject(err);
+        else resolve(rows);
       });
     });
   });
@@ -283,11 +244,8 @@ function updateTrip(updatedFields, db) {
     query = query.concat(` WHERE id = ${updatedFields.tripId}`);
     db.serialize(() => {
       db.run(query, function (err, rows) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(`Trip with id = ${updatedFields.tripId} has been updated.`);
-        }
+        if (err) reject(err);
+        else resolve(`Trip with id = ${updatedFields.tripId} has been updated.`);
       });
     });
   });
