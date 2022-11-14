@@ -76,7 +76,9 @@ app.post("/drivers", async (req, res, next) => {
 
 //insert trip
 app.post("/trips", async (req, res, next) => {
+  //find active trips belonging to vehicle
   var activeTripsWithVehicle = await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId }, db);
+  //if there is already an active trip belonging to vehicle
   if (activeTripsWithVehicle.length > 0) {
     res.status(409).send("There already exists an active trip for this vehicle");
   } else {
@@ -87,17 +89,23 @@ app.post("/trips", async (req, res, next) => {
 
 //update trip
 app.put("/trips", async (req, res, next) => {
-  //find if trip with given tripId exists
+  //find if trip with requested tripId
   var tripToBeUpdated = await dbQueries.getTrip(req.body.tripId, db);
+  //if trip with tripId exists
   if (tripToBeUpdated) {
+    //if status field is requesting to change to 'active'
     if (req.params.status && req.params.status == "active") {
+      //find active trips belonging to vehicle
       var activeTripsWithVehicle = await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId, notId: req.body.tripId }, db);
+      //if there is already an active trip belonging to vehicle
       if (activeTripsWithVehicle.length > 0) {
         res.status(409).send("There already exists an active trip for this vehicle.");
         return;
       }
     }
+    //update trip with new fields
     await dbQueries.updateTrip(req.body, db);
+    //get updated trip
     var updatedTrip = await dbQueries.getTrip(req.body.tripId, db);
     res.json(endpointReponse.formTripResponse(updatedTrip));
   }
