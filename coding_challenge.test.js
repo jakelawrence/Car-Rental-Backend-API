@@ -26,6 +26,10 @@ describe("VEHICLE UNIT TEST: Create, insert and delete a vehicle", function () {
     expect(response.body.id).toEqual(vehicle.id);
     expect(response.body.make).toEqual(vehicle.make);
   });
+  it(`GET /vehicles: Fetch vehicle that does not exist.`, async function () {
+    const response = await request(app).get(`/vehicles/5`);
+    expect(response.status).toEqual(404);
+  });
   it(`DELETE /vehicles: Delete vehicle ${vehicle.make}`, async function () {
     const response = await request(app).delete(`/vehicles/${vehicle.id}`);
     expect(response.status).toEqual(204);
@@ -57,6 +61,10 @@ describe("DRIVER UNIT TEST: Create, insert and delete a driver", function () {
     expect(response.status).toEqual(200);
     expect(response.body.id).toEqual(driver.id);
     expect(response.body.driverName).toEqual(driver.driverName);
+  });
+  it(`GET /drivers: Fetch driver that does not exist.`, async function () {
+    const response = await request(app).get(`/drivers/5`);
+    expect(response.status).toEqual(404);
   });
   it(`DELETE /drivers: Delete driver ${driver.driverName}`, async function () {
     const response = await request(app).delete(`/drivers/${driver.id}`);
@@ -182,6 +190,10 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
   it(`GET /trips: Get inactive trips.s`, async function () {
     const response = await request(app).get(`/trips?status=inactive`);
     expect(response.status).toEqual(200);
+  });
+  it(`GET /trips: Fetch trip that does not exist.`, async function () {
+    const response = await request(app).get(`/trips/5`);
+    expect(response.status).toEqual(404);
   });
   trips.forEach((trip) => {
     //delete driver

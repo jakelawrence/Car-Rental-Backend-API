@@ -1,3 +1,4 @@
+//get vehicle by vehicleId
 function getVehicle(vehicleId, db) {
   return new Promise((resolve, reject) => {
     var query = `SELECT id, make FROM vehicle WHERE id =${vehicleId}`;
@@ -20,6 +21,7 @@ function getVehicle(vehicleId, db) {
   });
 }
 
+//get driver by driverId
 function getDriver(driverId, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -41,6 +43,7 @@ function getDriver(driverId, db) {
   });
 }
 
+//get trip by tripId
 function getTrip(tripId, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -71,6 +74,7 @@ function getTrip(tripId, db) {
   });
 }
 
+//insert vehicle into database
 function insertVehicle(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -91,6 +95,7 @@ function insertVehicle(data, db) {
   });
 }
 
+//insert driver into database
 function insertDriver(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -111,6 +116,7 @@ function insertDriver(data, db) {
   });
 }
 
+//insert trip into database
 function insertTrip(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -149,6 +155,7 @@ function insertTrip(data, db) {
   });
 }
 
+//delete vehicle from database by vehicleId
 function deleteVehicle(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -163,6 +170,7 @@ function deleteVehicle(data, db) {
   });
 }
 
+//delete driver from database by driverId
 function deleteDriver(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -177,6 +185,7 @@ function deleteDriver(data, db) {
   });
 }
 
+//delete trip from database by tripId
 function deleteTrip(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -190,6 +199,8 @@ function deleteTrip(data, db) {
     });
   });
 }
+
+//get trips from database by filtered data
 function filterTrips(data, db) {
   return new Promise((resolve, reject) => {
     var filters = [];
@@ -240,6 +251,7 @@ function filterTrips(data, db) {
   });
 }
 
+//update a trip in the database
 function updateTrip(updatedFields, db) {
   return new Promise((resolve, reject) => {
     var query = `UPDATE trip SET `;

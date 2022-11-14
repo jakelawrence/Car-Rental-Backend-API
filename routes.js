@@ -278,8 +278,15 @@ app.use((err, req, res, next) => {
     case "There already exists an active trip for this vehicle":
       res.status(409);
       break;
-    case "Trip not found." || "Driver not found." || "Vehicle not found.":
+    case "Vehicle not found.":
       res.status(404);
+      break;
+    case "Driver not found.":
+      res.status(404);
+      break;
+    case "Trip not found.":
+      res.status(404);
+      break;
     default:
       res.status(500);
       break;
