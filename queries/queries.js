@@ -9,7 +9,7 @@ function getVehicle(vehicleId, db) {
         }
         //no drivers with :id found
         else if (!row) {
-          reject(`Vehicle with id = ${vehicleId} not found.`);
+          reject("Vehicle not found.");
         }
         //return driver to user
         else {
@@ -30,7 +30,7 @@ function getDriver(driverId, db) {
         }
         //no drivers with :id found
         else if (!row) {
-          reject(`Driver with id = ${driverId} not found.`);
+          reject(`Driver not found.`);
         }
         //return driver to user
         else {
@@ -59,7 +59,7 @@ function getTrip(tripId, db) {
           }
           //no trip with :id found
           else if (!row) {
-            reject(`Trip with id = ${tripId} not found.`);
+            reject("Trip not found.");
           }
           //return trip to user
           else {
@@ -74,9 +74,9 @@ function getTrip(tripId, db) {
 function insertVehicle(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      db.run(`INSERT INTO vehicle (make) VALUES('${data.make}')`, function (err) {
+      db.get(`INSERT INTO vehicle (make) VALUES('${data.make}')`, function (err) {
         if (err) {
-          next(err);
+          reject(err);
         } else {
           db.get(`SELECT id, make FROM vehicle WHERE make ='${data.make}'`, function (err, row) {
             if (err) {
@@ -100,9 +100,10 @@ function insertDriver(data, db) {
         } else {
           db.get(`SELECT id, driverName FROM driver WHERE driverName ='${data.driverName}'`, function (err, row) {
             if (err) {
-              reject("Error encountered while displaying");
+              reject(err);
+            } else {
+              resolve(row);
             }
-            resolve(row);
           });
         }
       });
@@ -116,12 +117,12 @@ function insertTrip(data, db) {
       //create trip
       db.run(
         `
-      INSERT INTO trip (vehicleId, status, driverId, startedAt, expectedReturn) 
-      VALUES(${data.vehicleId},'${data.status ? data.status : "active"}',${data.driverId},'${data.startedAt}','${data.expectedReturn}')
+        INSERT INTO trip (vehicleId, status, driverId, startedAt, expectedReturn) 
+        VALUES(${data.vehicleId},'${data.status ? data.status : "active"}',${data.driverId},'${data.startedAt}','${data.expectedReturn}')
       `,
         function (err) {
           if (err) {
-            reject(err.message);
+            reject(err);
           } else {
             //return trip to user
             db.get(
@@ -135,7 +136,7 @@ function insertTrip(data, db) {
             `,
               function (err, row) {
                 if (err) {
-                  reject(err.message);
+                  reject(err);
                 } else {
                   resolve(row);
                 }
@@ -196,38 +197,41 @@ function filterTrips(data, db) {
     SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
     FROM trip t 
     JOIN driver d on d.id = t.driverId 
-    JOIN vehicle v on v.id = t.vehicleId 
-    WHERE `;
+    JOIN vehicle v on v.id = t.vehicleId `;
 
-    for (const key of Object.keys(data)) {
-      switch (key) {
-        case "status":
-          filters.push(`status = '${data[key]}'`);
-          break;
-        case "vehicleId":
-          filters.push(`vehicleId = ${data[key]}`);
-          break;
-        case "driverId":
-          filters.push(`driverId = ${data[key]}`);
-          break;
-        case "startedAt":
-          filters.push(`startedAt = '${data[key]}'`);
-          break;
-        case "expectedReturn":
-          filters.push(`expectedReturn = '${data[key]}'`);
-          break;
-        case "notId":
-          filters.push(`id != ${data[key]}`);
-          break;
-        default:
-          reject(key + " is not a valid filter type.");
+    if (Object.keys(data).length > 0) {
+      query = query.concat(" WHERE ");
+      for (const key of Object.keys(data)) {
+        switch (key) {
+          case "status":
+            filters.push(`status = '${data[key]}'`);
+            break;
+          case "vehicleId":
+            filters.push(`vehicleId = ${data[key]}`);
+            break;
+          case "driverId":
+            filters.push(`driverId = ${data[key]}`);
+            break;
+          case "startedAt":
+            filters.push(`startedAt = '${data[key]}'`);
+            break;
+          case "expectedReturn":
+            filters.push(`expectedReturn = '${data[key]}'`);
+            break;
+          case "notId":
+            filters.push(`id != ${data[key]}`);
+            break;
+          default:
+            reject("Malformed Request");
+        }
       }
     }
+
     query = query.concat(filters.join(" and "));
     db.serialize(() => {
       db.all(query, function (err, rows) {
         if (err) {
-          next(err);
+          reject(err);
         } else {
           resolve(rows);
         }
@@ -268,7 +272,7 @@ function updateTrip(updatedFields, db) {
     db.serialize(() => {
       db.run(query, function (err, rows) {
         if (err) {
-          next(err);
+          reject(err);
         } else {
           resolve(`Trip with id = ${updatedFields.tripId} has been updated.`);
         }

@@ -6,13 +6,22 @@ describe("Create, insert and delete a vehicle", function () {
     make: "Honda",
   };
   let vehicleResObject;
-  it("POST /vehicles", async function () {
+  it(`POST /vehicles: Insert vehicle model ${vehicleReqObject.make}`, async function () {
     const response = await request(app).post("/vehicles").send(vehicleReqObject);
     expect(response.status).toEqual(200);
     expect(response.body.make).toEqual(vehicleReqObject.make);
     vehicleResObject = response.body;
   });
-  it("GET /vehicles", async function () {
+  it(`POST /vehicles: Try to insert duplicate vehicle model ${vehicleReqObject.make}`, async function () {
+    const response = await request(app).post("/vehicles").send(vehicleReqObject);
+    expect(response.status).toEqual(500);
+  });
+  it(`POST /vehicles: Try to insert vehicle model but with invalid request body.`, async function () {
+    const response = await request(app).post("/vehicles").send({ test: "error" });
+    expect(response.status).toEqual(400);
+    expect(response.text).toEqual("Malformed Request");
+  });
+  it("GET /vehicles: Fetch vehicle Honda", async function () {
     const response = await request(app).get(`/vehicles/${vehicleResObject.id}`);
     expect(response.status).toEqual(200);
     expect(response.body.id).toEqual(vehicleResObject.id);
