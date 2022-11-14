@@ -1,7 +1,7 @@
 const express = require("express");
 var sqlite3 = require("sqlite3").verbose();
-var formatResBody = require("./formatResponseJSON");
-var checkForValidReqBody = require("./validateReqBody");
+var formatResBody = require("./helper_modules/formatResponseJSON");
+var checkForValidReqBody = require("./helper_modules/validateReqBody");
 var dbQueries = require("./database/queries");
 var db = new sqlite3.Database("./database/database.db");
 
