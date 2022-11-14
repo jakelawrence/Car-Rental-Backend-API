@@ -30,7 +30,7 @@ function getDriver(driverId, db) {
         }
         //no drivers with :id found
         else if (!row) {
-          reject(`Driver not found.`);
+          reject("Driver not found.");
         }
         //return driver to user
         else {
@@ -180,7 +180,6 @@ function deleteDriver(data, db) {
 function deleteTrip(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      console.log(data.id);
       db.get(`DELETE from trip where id =${data.id}`, function (err, row) {
         if (err) {
           reject(err);

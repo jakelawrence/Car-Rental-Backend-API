@@ -5,19 +5,21 @@ var checkForValidReqBody = require("./helper_modules/validateReqBody");
 var dbQueries = require("./database/queries");
 var db = new sqlite3.Database("./database/database.db");
 
-//init database tables (if not already created)
+//create vehicle table
 db.run(`
     CREATE TABLE IF NOT EXISTS vehicle (
       id INTEGER PRIMARY KEY, 
       make varchar(255) UNIQUE NOT NULL
     )
 `);
+//create driver table
 db.run(`
     CREATE TABLE IF NOT EXISTS driver (
       id INTEGER PRIMARY KEY, 
       driverName varchar(255) UNIQUE NOT NULL
     )
 `);
+//create trip table
 db.run(`
     CREATE TABLE IF NOT EXISTS trip (
       id INTEGER PRIMARY KEY, 
@@ -40,6 +42,7 @@ app.get("/vehicles/:id", async (req, res, next) => {
   if (req.params.id) {
     await dbQueries.getVehicle(req.params.id, db).then(
       (vehicle) => {
+        //get vehicle by id
         res.send(formatResBody.formVehicleResponse(vehicle));
       },
       (err) => {
@@ -55,6 +58,7 @@ app.get("/vehicles/:id", async (req, res, next) => {
 app.get("/drivers/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
+    //get driver by id
     await dbQueries.getDriver(req.params.id, db).then(
       (driver) => {
         res.json(formatResBody.formDriverResponse(driver));
@@ -72,6 +76,7 @@ app.get("/drivers/:id", async (req, res, next) => {
 app.get("/trips/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
+    //get trip by id
     await dbQueries.getTrip(req.params.id, db).then(
       (trip) => {
         res.json(formatResBody.formTripResponse(trip));
@@ -87,6 +92,7 @@ app.get("/trips/:id", async (req, res, next) => {
 
 //GET trip by filtered data
 app.get("/trips", async (req, res, next) => {
+  //get trips by filters
   await dbQueries.filterTrips(req.query, db).then(
     (trips) => {
       var filteredTrips = [];
@@ -121,7 +127,9 @@ app.post("/vehicles", async (req, res, next) => {
 
 //insert driver
 app.post("/drivers", async (req, res, next) => {
+  //check if req body is valid
   if (checkForValidReqBody.forInsertDriver(req.body)) {
+    //insert driver into database
     await dbQueries.insertDriver(req.body, db).then(
       (driver) => {
         res.send(formatResBody.formDriverResponse(driver));
@@ -137,22 +145,30 @@ app.post("/drivers", async (req, res, next) => {
 
 //insert trip
 app.post("/trips", async (req, res, next) => {
+  //check if req body is valid
   if (checkForValidReqBody.forInsertTrip(req.body)) {
     //find active trips belonging to vehicle
-    var activeTripsWithVehicle = await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId }, db);
-    //if there is already an active trip belonging to vehicle
-    if (activeTripsWithVehicle.length > 0) {
-      next("There already exists an active trip for this vehicle");
-    } else {
-      await dbQueries.insertTrip(req.body, db).then(
-        (trip) => {
-          res.json(formatResBody.formTripResponse(trip));
-        },
-        (err) => {
-          next(err);
+    await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId }, db).then(
+      async (activeTripsWithVehicle) => {
+        //if there is already an active trip belonging to vehicle
+        if (activeTripsWithVehicle.length > 0) {
+          next("There already exists an active trip for this vehicle");
+        } else {
+          //insert trip into database
+          await dbQueries.insertTrip(req.body, db).then(
+            (trip) => {
+              res.json(formatResBody.formTripResponse(trip));
+            },
+            (err) => {
+              next(err);
+            }
+          );
         }
-      );
-    }
+      },
+      (err) => {
+        next(err);
+      }
+    );
   } else {
     next("Malformed Request");
   }
@@ -160,32 +176,43 @@ app.post("/trips", async (req, res, next) => {
 
 //update trip
 app.put("/trips", async (req, res, next) => {
+  //check if req body is valid
   if (checkForValidReqBody.forUpdateTrip(req.body)) {
     //find if trip with requested tripId
-    var tripToBeUpdated = await dbQueries.getTrip(req.body.tripId, db);
-    //if trip with tripId exists
-    if (tripToBeUpdated) {
-      //if status field is requesting to change to 'active'
-      if (req.params.status && req.params.status == "active") {
-        //find active trips belonging to vehicle
-        var activeTripsWithVehicle = await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId, notId: req.body.tripId }, db);
-        //if there is already an active trip belonging to vehicle
-        if (activeTripsWithVehicle.length > 0) {
-          next("There already exists an active trip for this vehicle.");
+    await dbQueries.getTrip(req.body.tripId, db).then(
+      //if trip with tripId exists
+      async (tripToBeUpdated) => {
+        //if status is a field to be updated
+        if (req.params.status && req.params.status == "active") {
+          //find active trips belonging to vehicle
+          await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId, notId: tripToBeUpdated.id }, db).then(
+            (activeTripsWithVehicle) => {
+              //if there is an active trip assigned to vehicle
+              if (activeTripsWithVehicle.length > 0) {
+                next("There already exists an active trip for this vehicle.");
+              }
+            },
+            (err) => {
+              next(err);
+            }
+          );
         }
+        //update trip with new fields
+        await dbQueries.updateTrip(req.body, db);
+        //fetch updated trip
+        await dbQueries.getTrip(req.body.tripId, db).then(
+          (updatedTrip) => {
+            res.json(formatResBody.formTripResponse(updatedTrip));
+          },
+          (err) => {
+            next(err);
+          }
+        );
+      },
+      (err) => {
+        next(err);
       }
-      //update trip with new fields
-      await dbQueries.updateTrip(req.body, db);
-      //get updated trip
-      await dbQueries.getTrip(req.body.tripId, db).then(
-        (updatedTrip) => {
-          res.json(formatResBody.formTripResponse(updatedTrip));
-        },
-        (err) => {
-          next(err);
-        }
-      );
-    }
+    );
   } else {
     next("Malformed Request");
   }
@@ -242,6 +269,7 @@ app.delete("/trips/:id", async (req, res, next) => {
   }
 });
 
+//error handling
 app.use((err, req, res, next) => {
   switch (err) {
     case "Malformed Request":
@@ -250,6 +278,8 @@ app.use((err, req, res, next) => {
     case "There already exists an active trip for this vehicle":
       res.status(409);
       break;
+    case "Trip not found." || "Driver not found." || "Vehicle not found.":
+      res.status(404);
     default:
       res.status(500);
       break;
