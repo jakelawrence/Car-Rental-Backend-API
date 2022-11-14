@@ -38,17 +38,13 @@ app.use(express.json());
 
 //GET vehicle by id
 app.get("/vehicles/:id", async (req, res, next) => {
-  //checks if id included in req
+  //checks if vehicle id included in req
   if (req.params.id) {
-    await dbQueries.getVehicle(req.params.id, db).then(
-      (vehicle) => {
-        //get vehicle by id
-        res.send(formatResBody.formVehicleResponse(vehicle));
-      },
-      (err) => {
-        next(err);
-      }
-    );
+    //get vehicle by id
+    await dbQueries
+      .getVehicle(req.params.id, db)
+      .then((vehicle) => res.send(formatResBody.formVehicleResponse(vehicle)))
+      .catch(next);
   } else {
     next("Malformed Request");
   }
@@ -56,17 +52,13 @@ app.get("/vehicles/:id", async (req, res, next) => {
 
 //GET driver by id
 app.get("/drivers/:id", async (req, res, next) => {
-  //checks if id included in req
+  //checks if driver id included in req
   if (req.params.id) {
     //get driver by id
-    await dbQueries.getDriver(req.params.id, db).then(
-      (driver) => {
-        res.json(formatResBody.formDriverResponse(driver));
-      },
-      (err) => {
-        next(err);
-      }
-    );
+    await dbQueries
+      .getDriver(req.params.id, db)
+      .then((driver) => res.json(formatResBody.formDriverResponse(driver)))
+      .catch(next);
   } else {
     next("Malformed Request");
   }
@@ -74,17 +66,13 @@ app.get("/drivers/:id", async (req, res, next) => {
 
 //GET trip by id
 app.get("/trips/:id", async (req, res, next) => {
-  //checks if id included in req
+  //checks if trip id included in req
   if (req.params.id) {
     //get trip by id
-    await dbQueries.getTrip(req.params.id, db).then(
-      (trip) => {
-        res.json(formatResBody.formTripResponse(trip));
-      },
-      (err) => {
-        next(err);
-      }
-    );
+    await dbQueries
+      .getTrip(req.params.id, db)
+      .then((trip) => res.json(formatResBody.formTripResponse(trip)))
+      .catch(next);
   } else {
     next("Malformed Request");
   }
@@ -93,82 +81,68 @@ app.get("/trips/:id", async (req, res, next) => {
 //GET trip by filtered data
 app.get("/trips", async (req, res, next) => {
   //get trips by filters
-  await dbQueries.filterTrips(req.query, db).then(
-    (trips) => {
+  await dbQueries
+    .filterTrips(req.query, db)
+    .then((trips) => {
       var filteredTrips = [];
       trips.forEach((trip) => {
         filteredTrips.push(formatResBody.formTripResponse(trip));
       });
       res.json(filteredTrips);
-    },
-    (err) => {
-      next(err);
-    }
-  );
+    })
+    .catch(next);
 });
 
-//insert vehicle
+//create vehicle
 app.post("/vehicles", async (req, res, next) => {
-  //check if req body is valid
+  //check if req body for creating vehicle is valid
   if (checkForValidReqBody.forInsertVehicle(req.body)) {
     //insert vehicle into database
-    await dbQueries.insertVehicle(req.body, db).then(
-      (vehicle) => {
-        res.send(formatResBody.formVehicleResponse(vehicle));
-      },
-      (err) => {
-        next(err);
-      }
-    );
+    await dbQueries
+      .insertVehicle(req.body, db)
+      .then((vehicle) => res.send(formatResBody.formVehicleResponse(vehicle)))
+      .catch(next);
   } else {
     next("Malformed Request");
   }
 });
 
-//insert driver
+//create driver
 app.post("/drivers", async (req, res, next) => {
-  //check if req body is valid
+  //check if req body for creating driver is valid
   if (checkForValidReqBody.forInsertDriver(req.body)) {
     //insert driver into database
-    await dbQueries.insertDriver(req.body, db).then(
-      (driver) => {
-        res.send(formatResBody.formDriverResponse(driver));
-      },
-      (err) => {
-        next(err);
-      }
-    );
+    await dbQueries
+      .insertDriver(req.body, db)
+      .then((driver) => res.send(formatResBody.formDriverResponse(driver)))
+      .catch(next);
   } else {
     next("Malformed Request");
   }
 });
 
-//insert trip
+//create trip
 app.post("/trips", async (req, res, next) => {
-  //check if req body is valid
+  //check if req body for creating trip is valid
   if (checkForValidReqBody.forInsertTrip(req.body)) {
     //find active trips belonging to vehicle
-    await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId }, db).then(
-      async (activeTripsWithVehicle) => {
-        //if there is already an active trip belonging to vehicle
+    await dbQueries
+      .filterTrips({ status: "active", vehicleId: req.body.vehicleId }, db)
+      .then(async (activeTripsWithVehicle) => {
+        //if there is already an active trip for vehicle
         if (activeTripsWithVehicle.length > 0) {
           next("There already exists an active trip for this vehicle");
-        } else {
-          //insert trip into database
-          await dbQueries.insertTrip(req.body, db).then(
-            (trip) => {
-              res.json(formatResBody.formTripResponse(trip));
-            },
-            (err) => {
-              next(err);
-            }
-          );
         }
-      },
-      (err) => {
-        next(err);
-      }
-    );
+        //no active trips for vehicle
+        else {
+          //insert trip into database
+          await dbQueries
+            .insertTrip(req.body, db)
+            .then((trip) => res.json(formatResBody.formTripResponse(trip)))
+            .catch(next);
+        }
+      })
+      .catch(next);
   } else {
     next("Malformed Request");
   }
@@ -176,43 +150,34 @@ app.post("/trips", async (req, res, next) => {
 
 //update trip
 app.put("/trips", async (req, res, next) => {
-  //check if req body is valid
+  //check if req body for updating trip is valid
   if (checkForValidReqBody.forUpdateTrip(req.body)) {
     //find if trip with requested tripId
-    await dbQueries.getTrip(req.body.tripId, db).then(
-      //if trip with tripId exists
-      async (tripToBeUpdated) => {
-        //if status is a field to be updated
+    await dbQueries
+      .getTrip(req.body.tripId, db)
+      .then(async (tripToBeUpdated) => {
+        //if user is trying to update status to active
         if (req.params.status && req.params.status == "active") {
           //find active trips belonging to vehicle
-          await dbQueries.filterTrips({ status: "active", vehicleId: req.body.vehicleId, notId: tripToBeUpdated.id }, db).then(
-            (activeTripsWithVehicle) => {
+          await dbQueries
+            .filterTrips({ status: "active", vehicleId: req.body.vehicleId, notId: tripToBeUpdated.id }, db)
+            .then((activeTripsWithVehicle) => {
               //if there is an active trip assigned to vehicle
               if (activeTripsWithVehicle.length > 0) {
                 next("There already exists an active trip for this vehicle.");
               }
-            },
-            (err) => {
-              next(err);
-            }
-          );
+            })
+            .catch(next);
         }
         //update trip with new fields
         await dbQueries.updateTrip(req.body, db);
         //fetch updated trip
-        await dbQueries.getTrip(req.body.tripId, db).then(
-          (updatedTrip) => {
-            res.json(formatResBody.formTripResponse(updatedTrip));
-          },
-          (err) => {
-            next(err);
-          }
-        );
-      },
-      (err) => {
-        next(err);
-      }
-    );
+        await dbQueries
+          .getTrip(req.body.tripId, db)
+          .then((updatedTrip) => res.json(formatResBody.formTripResponse(updatedTrip)))
+          .catch(next);
+      })
+      .catch(next);
   } else {
     next("Malformed Request");
   }
@@ -222,14 +187,10 @@ app.put("/trips", async (req, res, next) => {
 app.delete("/vehicles/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
-    await dbQueries.deleteVehicle(req.params, db).then(
-      (resMsg) => {
-        res.status(204).send(resMsg);
-      },
-      (err) => {
-        next(err);
-      }
-    );
+    await dbQueries
+      .deleteVehicle(req.params, db)
+      .then((resMsg) => res.status(204).send(resMsg))
+      .catch(next);
   } else {
     next("Malformed Request");
   }
@@ -239,14 +200,10 @@ app.delete("/vehicles/:id", async (req, res, next) => {
 app.delete("/drivers/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
-    await dbQueries.deleteDriver(req.params, db).then(
-      (resMsg) => {
-        res.status(204).send(resMsg);
-      },
-      (err) => {
-        next(err);
-      }
-    );
+    await dbQueries
+      .deleteDriver(req.params, db)
+      .then((resMsg) => res.status(204).send(resMsg))
+      .catch(next);
   } else {
     next("Malformed Request");
   }
@@ -256,14 +213,10 @@ app.delete("/drivers/:id", async (req, res, next) => {
 app.delete("/trips/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
-    await dbQueries.deleteTrip(req.params, db).then(
-      (resMsg) => {
-        res.status(204).send(resMsg);
-      },
-      (err) => {
-        next(err);
-      }
-    );
+    await dbQueries
+      .deleteTrip(req.params, db)
+      .then((resMsg) => res.status(204).send(resMsg))
+      .catch(next);
   } else {
     next("Malformed Request");
   }
