@@ -44,7 +44,7 @@ Your local car sharing company is looking to create an application that can help
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of trip to fetch |
 
-### Filter trips *(Pass filters using query parameters in URL)*
+### Get filter trips *(Pass filters using query parameters in URL)*
 
 `GET /trips/?status=active|inactive`
 
@@ -118,9 +118,9 @@ Your local car sharing company is looking to create an application that can help
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of trip to delete |
 
-## Usage/Examples
+# Usage/Examples
 
-***POST /vehicles***
+`***POST /vehicles***`
 
 ### Request
 ```javascript
