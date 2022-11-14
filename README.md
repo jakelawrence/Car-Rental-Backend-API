@@ -115,14 +115,14 @@ Your local car sharing company is looking to create an application that can help
 ***POST /vehicles***
 
 *Request*
-```json
+```javascript
 {
     make: "Honda",
 }
 ```
 
 *Response*
-```json
+```javascript
 
 {
     id: 1,
@@ -132,7 +132,7 @@ Your local car sharing company is looking to create an application that can help
 ***GET /vehicles/1***
 
 *Response*
-```json
+```javascript
 {
     id: 1,
     make: "Honda",
@@ -142,14 +142,14 @@ Your local car sharing company is looking to create an application that can help
 ***POST /drivers***
 
 *Request*
-```json
+```javascript
 {
     driverName: "John Doe",
 }
 ```
 
 *Response*
-```json
+```javascript
 
 {
     id: 1,
@@ -159,7 +159,7 @@ Your local car sharing company is looking to create an application that can help
 ***GET /driver/1***
 
 *Response*
-```json
+```javascript
 {
     id: 1,
     driverName: "John Doe",
@@ -169,7 +169,7 @@ Your local car sharing company is looking to create an application that can help
 ***POST /trips***
 
 *Request*
-```json
+```javascript
 {
 
     vehicleId: 1,
@@ -180,7 +180,7 @@ Your local car sharing company is looking to create an application that can help
 ```
 
 *Response*
-```json
+```javascript
 
 {
     id: 1,
@@ -200,7 +200,7 @@ Your local car sharing company is looking to create an application that can help
 ***GET /trips/1***
 
 *Response*
-```json
+```javascript
 {
     id: 1,
     startedAt: "2022-02-24T14:43:18-08:00",
@@ -220,7 +220,7 @@ Your local car sharing company is looking to create an application that can help
 ***PUT /trips***
 
 *Request*
-```json
+```javascript
 {
 
     tripId: 1,
@@ -229,7 +229,7 @@ Your local car sharing company is looking to create an application that can help
 ```
 
 *Response*
-```json
+```javascript
 
 {
     id: 1,
