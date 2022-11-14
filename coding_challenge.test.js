@@ -47,130 +47,144 @@ describe("Create, insert and delete a driver", function () {
   });
 });
 describe("Create, insert and delete a trip", function () {
-  let vehicleMake = "Honda";
-  let vehicleId;
+  var vehicles = [
+    {
+      make: "Honda",
+    },
+    {
+      make: "Toyota",
+    },
+  ];
+  var drivers = [
+    {
+      driverName: "Jake Lawrence",
+    },
+    { driverName: "Lisa Gulley" },
+  ];
+  var trips = [
+    {
+      startedAt: "2022-02-24T14:43:18-08:00",
+      expectedReturn: "2022-03-24T14:43:18-08:00",
+    },
+    {
+      startedAt: "2022-02-24T14:43:18-08:00",
+      expectedReturn: "2022-03-24T14:43:18-08:00",
+    },
+  ];
 
-  let driverName = "Jake Lawrence";
-  let driverId;
-
-  let driverName2 = "Lisa Gulley";
-  let driverId2;
-
-  let startedAt = "2022-02-24T14:43:18-08:00";
-  let expectedReturn = "2022-03-24T14:43:18-08:00";
-  let tripId;
-
-  it("POST /vehicles", async function () {
-    const response = await request(app).post("/vehicles").send({ make: vehicleMake });
-
-    expect(response.status).toEqual(200);
-    expect(response.body.make).toEqual(vehicleMake);
-    vehicleId = response.body.id;
+  drivers.forEach((driver) => {
+    //create driver
+    it("POST /drivers", async function () {
+      const response = await request(app).post("/drivers").send({ driverName: driver.driverName });
+      expect(response.status).toEqual(200);
+      expect(response.body.driverName).toEqual(driver.driverName);
+      driver.id = response.body.id;
+    });
+    //get driver
+    it("GET /drivers", async function () {
+      const response = await request(app).get(`/drivers/${driver.id}`);
+      expect(response.status).toEqual(200);
+      expect(response.body.id).toEqual(driver.id);
+      expect(response.body.driverName).toEqual(driver.driverName);
+    });
   });
-  it("GET /vehicles", async function () {
-    const response = await request(app).get(`/vehicles/${vehicleId}`);
 
-    expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(vehicleId);
-    expect(response.body.make).toEqual(vehicleMake);
+  vehicles.forEach((vehicle) => {
+    //create vehicle
+    it("POST /vehicles", async function () {
+      const response = await request(app).post("/vehicles").send({ make: vehicle.make });
+      expect(response.status).toEqual(200);
+      expect(response.body.make).toEqual(vehicle.make);
+      vehicle.id = response.body.id;
+    });
+    //get vehicle
+    it("GET /vehicles", async function () {
+      const response = await request(app).get(`/vehicles/${vehicle.id}`);
+      expect(response.status).toEqual(200);
+      expect(response.body.id).toEqual(vehicle.id);
+      expect(response.body.make).toEqual(vehicle.make);
+    });
   });
-
-  it("POST /drivers", async function () {
-    const response = await request(app).post("/drivers").send({ driverName: driverName });
-
-    expect(response.status).toEqual(200);
-    expect(response.body.driverName).toEqual(driverName);
-    driverId = response.body.id;
-  });
-
-  it("GET /drivers", async function () {
-    const response = await request(app).get(`/drivers/${driverId}`);
-    expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(driverId);
-    expect(response.body.driverName).toEqual(driverName);
-  });
-
-  it("POST /trips", async function () {
-    const response = await request(app).post("/trips").send({
-      driverId: driverId,
-      vehicleId: vehicleId,
-      startedAt: startedAt,
-      expectedReturn: expectedReturn,
+  trips.forEach((trip, index) => {
+    var driver = drivers[index];
+    var vehicle = vehicles[index];
+    //create trip
+    it("POST /trips", async function () {
+      const response = await request(app).post("/trips").send({
+        driverId: driver.id,
+        vehicleId: vehicle.id,
+        startedAt: trip.startedAt,
+        expectedReturn: trip.expectedReturn,
+      });
+      expect(response.status).toEqual(200);
+      expect(response.body.startedAt).toEqual(trip.startedAt);
+      expect(response.body.expectedReturn).toEqual(trip.expectedReturn);
+      expect(response.body.driver.driverId).toEqual(driver.id);
+      expect(response.body.driver.driverName).toEqual(driver.driverName);
+      expect(response.body.vehicle.vehicleId).toEqual(vehicle.id);
+      expect(response.body.vehicle.make).toEqual(vehicle.make);
+      trip.id = response.body.id;
     });
 
-    expect(response.status).toEqual(200);
-    expect(response.body.startedAt).toEqual(startedAt);
-    expect(response.body.expectedReturn).toEqual(expectedReturn);
-    expect(response.body.driver.driverId).toEqual(driverId);
-    expect(response.body.driver.driverName).toEqual(driverName);
-    expect(response.body.vehicle.vehicleId).toEqual(vehicleId);
-    expect(response.body.vehicle.make).toEqual(vehicleMake);
-    tripId = response.body.id;
+    //get trip
+    it("GET /trips", async function () {
+      const response = await request(app).get(`/trips/${trip.id}`);
+      expect(response.status).toEqual(200);
+      expect(response.body.startedAt).toEqual(trip.startedAt);
+      expect(response.body.expectedReturn).toEqual(trip.expectedReturn);
+      expect(response.body.driver.driverId).toEqual(driver.id);
+      expect(response.body.driver.driverName).toEqual(driver.driverName);
+      expect(response.body.vehicle.vehicleId).toEqual(vehicle.id);
+      expect(response.body.vehicle.make).toEqual(vehicle.make);
+    });
   });
-
   it("GET /trips", async function () {
-    const response = await request(app).get(`/trips/${tripId}`);
-    expect(response.status).toEqual(200);
-    expect(response.body.startedAt).toEqual(startedAt);
-    expect(response.body.expectedReturn).toEqual(expectedReturn);
-    expect(response.body.driver.driverId).toEqual(driverId);
-    expect(response.body.driver.driverName).toEqual(driverName);
-    expect(response.body.vehicle.vehicleId).toEqual(vehicleId);
-    expect(response.body.vehicle.make).toEqual(vehicleMake);
-  });
-
-  it("GET /trips?status=active", async function () {
     const response = await request(app).get(`/trips?status=active`);
-    console.log(response.body);
     expect(response.status).toEqual(200);
-    expect(response.body.startedAt).toEqual(startedAt);
-    expect(response.body.expectedReturn).toEqual(expectedReturn);
-    expect(response.body.driver.driverId).toEqual(driverId);
-    expect(response.body.driver.driverName).toEqual(driverName);
-    expect(response.body.vehicle.vehicleId).toEqual(vehicleId);
-    expect(response.body.vehicle.make).toEqual(vehicleMake);
   });
-
-  it("POST /drivers", async function () {
-    const response = await request(app).post("/drivers").send({ driverName: driverName2 });
-
-    expect(response.status).toEqual(200);
-    expect(response.body.driverName).toEqual(driverName2);
-    driverId2 = response.body.id;
-  });
-
-  it("GET /drivers", async function () {
-    const response = await request(app).get(`/drivers/${driverId2}`);
-    expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(driverId2);
-    expect(response.body.driverName).toEqual(driverName2);
-  });
-
-  it("POST /trips", async function () {
-    const response = await request(app).post("/trips").send({
-      driverId: driverId2,
-      vehicleId: vehicleId,
-      startedAt: startedAt,
-      expectedReturn: expectedReturn,
+  trips.forEach((trip, index) => {
+    var driver = drivers[index];
+    var vehicle = vehicles[index];
+    //update trip
+    it("PUT /trips", async function () {
+      const response = await request(app).put(`/trips`).send({
+        tripId: trip.id,
+        status: "inactive",
+      });
+      console.log(response.body);
+      expect(response.status).toEqual(200);
+      expect(response.body.status).toEqual("inactive");
+      expect(response.body.startedAt).toEqual(trip.startedAt);
+      expect(response.body.expectedReturn).toEqual(trip.expectedReturn);
+      expect(response.body.driver.driverId).toEqual(driver.id);
+      expect(response.body.driver.driverName).toEqual(driver.driverName);
+      expect(response.body.vehicle.vehicleId).toEqual(vehicle.id);
+      expect(response.body.vehicle.make).toEqual(vehicle.make);
     });
-
-    expect(response.status).toEqual(409);
   });
-
-  it("DELETE /trips", async function () {
-    const response = await request(app).delete(`/trips/${tripId}`);
-    expect(response.status).toEqual(204);
+  it("GET /trips", async function () {
+    const response = await request(app).get(`/trips?status=active`);
+    expect(response.status).toEqual(200);
   });
-  it("DELETE /vehicles", async function () {
-    const response = await request(app).delete(`/vehicles/${vehicleId}`);
-    expect(response.status).toEqual(204);
+  trips.forEach((trip) => {
+    //delete driver
+    it("DELETE /trip", async function () {
+      const response = await request(app).delete(`/trips/${trip.id}`);
+      expect(response.status).toEqual(204);
+    });
   });
-  it("DELETE /drivers", async function () {
-    const response = await request(app).delete(`/drivers/${driverId}`);
-    expect(response.status).toEqual(204);
+  drivers.forEach((driver) => {
+    //delete driver
+    it("DELETE /driver", async function () {
+      const response = await request(app).delete(`/drivers/${driver.id}`);
+      expect(response.status).toEqual(204);
+    });
   });
-  it("DELETE /drivers", async function () {
-    const response = await request(app).delete(`/drivers/${driverId2}`);
-    expect(response.status).toEqual(204);
+  vehicles.forEach((vehicle) => {
+    //delete driver
+    it("DELETE /vehicle", async function () {
+      const response = await request(app).delete(`/vehicles/${vehicle.id}`);
+      expect(response.status).toEqual(204);
+    });
   });
 });

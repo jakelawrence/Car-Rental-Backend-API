@@ -113,11 +113,48 @@ function getTripsByFilteredData(data) {
       case "driverId":
         filters.push(`driverId = ${data[key]}`);
         break;
+      case "startedAt":
+        filters.push(`startedAt = '${data[key]}'`);
+        break;
+      case "expectedReturn":
+        filters.push(`expectedReturn = '${data[key]}'`);
+        break;
       default:
         throw new Error(key + " is not a valid filter type.");
     }
   }
   query = query.concat(filters.join(" and "));
+  return query;
+}
+
+function updateTrip(updatedFields) {
+  var query = `UPDATE trip SET `;
+  var updatedFieldsSQL = [];
+  for (const key of Object.keys(updatedFields)) {
+    switch (key) {
+      case "tripId":
+        break;
+      case "status":
+        updatedFieldsSQL.push(`status = '${updatedFields[key]}'`);
+        break;
+      case "startedAt":
+        updatedFieldsSQL.push(`startedAt = '${updatedFields[key]}'`);
+        break;
+      case "expectedReturn":
+        updatedFieldsSQL.push(`expectedReturn = '${updatedFields[key]}'`);
+        break;
+      case "vehicleId":
+        updatedFieldsSQL.push(`vehicleId = ${updatedFields[key]}`);
+        break;
+      case "driverId":
+        updatedFieldsSQL.push(`driverId = ${updatedFields[key]}`);
+        break;
+      default:
+        throw new Error(key + " is not a valid field to update.");
+    }
+  }
+  query = query.concat(updatedFieldsSQL.join(", "));
+  query = query.concat(` WHERE id = ${updatedFields.tripId}`);
   return query;
 }
 
@@ -138,4 +175,5 @@ module.exports = {
   getTripByTripData,
   deleteTripByID,
   getTripsByFilteredData,
+  updateTrip,
 };
