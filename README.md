@@ -150,6 +150,8 @@ Your local car sharing company is looking to create an application that can help
 }
 ```
 
+---
+
 `POST /drivers`
 
 ### Request
@@ -177,6 +179,8 @@ Your local car sharing company is looking to create an application that can help
     driverName: "John Doe",
 }
 ```
+
+---
 
 `POST /trips`
 
