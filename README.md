@@ -122,6 +122,8 @@ Your local car sharing company is looking to create an application that can help
 
 # Usage/Examples
 
+## Vehicles
+
 `POST /vehicles`
 
 ### Request
@@ -152,6 +154,8 @@ Your local car sharing company is looking to create an application that can help
 
 ---
 
+## Drivers
+
 `POST /drivers`
 
 ### Request
@@ -181,6 +185,8 @@ Your local car sharing company is looking to create an application that can help
 ```
 
 ---
+
+## Trips
 
 `POST /trips`
 
