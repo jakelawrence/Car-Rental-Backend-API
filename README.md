@@ -82,6 +82,8 @@ Your local car sharing company is looking to create an application that can help
 | `expectedReturn` | `date` | **Required**. Expected return of vehicle |
 | `status` | `string` | Current status of trip (active or inactive) |
 
+> NOTE: While a vehicle can go on multiple trips, it cannot be on more than 1 active trip at a time.
+
 ### Update trip
 
 `PUT /trips`
