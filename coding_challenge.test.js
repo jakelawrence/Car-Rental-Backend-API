@@ -18,7 +18,7 @@ describe("VEHICLE UNIT TEST: Create, insert and delete a vehicle", function () {
   it(`POST /vehicles: Try to insert vehicle model but with invalid request body.`, async function () {
     const response = await request(app).post("/vehicles").send({ test: "error" });
     expect(response.status).toEqual(400);
-    expect(response.text).toEqual("Malformed Request");
+    expect(response.error.text).toEqual("Malformed Request");
   });
   it(`GET /vehicles: Fetch vehicle ${vehicle.make}`, async function () {
     const response = await request(app).get(`/vehicles/${vehicle.id}`);
@@ -29,6 +29,7 @@ describe("VEHICLE UNIT TEST: Create, insert and delete a vehicle", function () {
   it(`GET /vehicles: Fetch vehicle that does not exist.`, async function () {
     const response = await request(app).get(`/vehicles/5`);
     expect(response.status).toEqual(404);
+    expect(response.error.text).toEqual("Vehicle not found.");
   });
   it(`DELETE /vehicles: Delete vehicle ${vehicle.make}`, async function () {
     const response = await request(app).delete(`/vehicles/${vehicle.id}`);
@@ -54,7 +55,7 @@ describe("DRIVER UNIT TEST: Create, insert and delete a driver", function () {
   it(`POST /drivers: Try to insert driver but with invalid request body.`, async function () {
     const response = await request(app).post("/drivers").send({ driverrrrr: "this is not a valid body" });
     expect(response.status).toEqual(400);
-    expect(response.text).toEqual("Malformed Request");
+    expect(response.error.text).toEqual("Malformed Request");
   });
   it(`GET /drivers: Fetch driver ${driver.driverName}`, async function () {
     const response = await request(app).get(`/drivers/${driver.id}`);
@@ -65,6 +66,7 @@ describe("DRIVER UNIT TEST: Create, insert and delete a driver", function () {
   it(`GET /drivers: Fetch driver that does not exist.`, async function () {
     const response = await request(app).get(`/drivers/5`);
     expect(response.status).toEqual(404);
+    expect(response.error.text).toEqual("Driver not found.");
   });
   it(`DELETE /drivers: Delete driver ${driver.driverName}`, async function () {
     const response = await request(app).delete(`/drivers/${driver.id}`);
@@ -96,6 +98,10 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
       expectedReturn: "2022-03-24T14:43:18-08:00",
     },
   ];
+  var tripToTestActiveTripDetection = {
+    startedAt: "2022-02-26T14:43:18-08:00",
+    expectedReturn: "2022-03-26T14:43:18-08:00",
+  };
 
   drivers.forEach((driver) => {
     //create driver
@@ -163,6 +169,16 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
       expect(response.body.vehicle.make).toEqual(vehicle.make);
     });
   });
+  it(`POST /trips: Insert trip with vehicle ${vehicles[0].make} to test active trips detection`, async function () {
+    const response = await request(app).post("/trips").send({
+      driverId: drivers[0].id,
+      vehicleId: vehicles[0].id,
+      startedAt: tripToTestActiveTripDetection.startedAt,
+      expectedReturn: tripToTestActiveTripDetection.expectedReturn,
+    });
+    expect(response.status).toEqual(409);
+    expect(response.error.text).toEqual("There already exists an active trip for this vehicle");
+  });
   it(`GET /trips: Get active trips.`, async function () {
     const response = await request(app).get(`/trips?status=active`);
     expect(response.status).toEqual(200);
@@ -194,6 +210,7 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
   it(`GET /trips: Fetch trip that does not exist.`, async function () {
     const response = await request(app).get(`/trips/5`);
     expect(response.status).toEqual(404);
+    expect(response.error.text).toEqual("Trip not found.");
   });
   trips.forEach((trip) => {
     //delete driver
