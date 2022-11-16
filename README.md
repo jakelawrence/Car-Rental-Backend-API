@@ -6,83 +6,73 @@ Your local car sharing company is looking to create an application that can help
 2. Return a list of active vehicles on the road and their driver
 
 
-## Deployment
+## Install
 
-To deploy this project, clone repo and execute:
+    npm install
 
-```bash
-  npm install
-  npm start
-```
+## Run the app
 
-For unit and integration testing, clone repo and execute:
-```bash
-  npm install
-  npm test
-```
+    npm start
 
-## API Reference
+## Run unit and integration tests
 
-#### Get vehicle
+    npm test
 
-```http
-  GET /vehicles/${id}
-```
+# API Reference
+
+### Get vehicle
+
+`GET /vehicles/${id}`
 
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of vehicle to fetch |
 
-#### Get driver
+### Get driver
 
-```http
-  GET /drivers/${id}
-```
+`GET /drivers/${id}`
 
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of driver to fetch |
 
-#### Get trip
+### Get trip
 
-```http
-  GET /trips/${id}
-```
+`GET /trips/${id}`
 
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of trip to fetch |
 
-#### Filter trips *(Pass filters using query parameters in URL)*
+### Get filter trips *(Pass filters using query parameters in URL)*
 
-```http
-  GET /trips/?status=active|inactive
-```
+`GET /trips/?status=active|inactive`
+
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `status`      | `int` | Filter by status of trip |
 | `startedAt`      | `date` | Filter by startedAt of trip |
 | `expectedReturn`      | `date` | Filter by expectedReturn of trip |
 
-```http
-  POST /vehicles
-```
+### Create vehicle
+
+`POST /vehicles`
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `make` | `string` | **Required**. Make of the car to be created |
 
-```http
-  POST /drivers
-```
+### Create driver
+
+`POST /drivers`
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `driverName` | `string` | **Required**. Name of the driver to be created |
 
-```http
-  POST /trips
-```
+### Create trip
+
+`POST /trips`
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
@@ -92,9 +82,11 @@ For unit and integration testing, clone repo and execute:
 | `expectedReturn` | `date` | **Required**. Expected return of vehicle |
 | `status` | `string` | Current status of trip (active or inactive) |
 
-```http
-  PUT /trips
-```
+> NOTE: While a vehicle can go on multiple trips, it cannot be on more than 1 active trip at a time.
+
+### Update trip
+
+`PUT /trips`
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
@@ -103,97 +95,103 @@ For unit and integration testing, clone repo and execute:
 | `expectedReturn` | `date` | Expected return of vehicle |
 | `status` | `string` | Current status of trip (active or inactive) |
 
-#### Delete vehicle
+### Delete vehicle
 
-```http
-  GET /vehicles/${id}
-```
+`GET /vehicles/${id}`
 
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of vehicle to delete |
 
 
-#### Delete driver
+### Delete driver
 
-```http
-  GET /drivers/${id}
-```
+`GET /drivers/${id}`
 
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of driver to delete |
 
-#### Delete trip
+### Delete trip
 
-```http
-  GET /trips/${id}
-```
+`GET /trips/${id}`
 
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `int` | **Required**. Id of trip to delete |
 
-## Usage/Examples
+# Usage/Examples
 
-***POST /vehicles***
+## Vehicles
 
-*Input*
-```json
+`POST /vehicles`
+
+### Request
+```javascript
 {
     make: "Honda",
 }
 ```
 
-*Output*
-```json
+### Response
+```javascript
 
-{
-    id: 1,
-    make: "Honda",
-}
-```
-***GET /vehicles/1***
-
-*Output*
-```json
 {
     id: 1,
     make: "Honda",
 }
 ```
 
-***POST /drivers***
+`GET /vehicles/1`
 
-*Input*
-```json
+### Response
+```javascript
+{
+    id: 1,
+    make: "Honda",
+}
+```
+
+---
+
+## Drivers
+
+`POST /drivers`
+
+### Request
+```javascript
 {
     driverName: "John Doe",
 }
 ```
 
-*Output*
-```json
+### Response
+```javascript
 
 {
     id: 1,
     driverName: "John Doe",
 }
 ```
-***GET /driver/1***
 
-*Output*
-```json
+`GET /driver/1`
+
+### Response
+```javascript
 {
     id: 1,
     driverName: "John Doe",
 }
 ```
 
-***POST /trips***
+---
 
-*Input*
-```json
+## Trips
+
+`POST /trips`
+
+### Request
+```javascript
 {
 
     vehicleId: 1,
@@ -203,8 +201,8 @@ For unit and integration testing, clone repo and execute:
 }
 ```
 
-*Output*
-```json
+### Response
+```javascript
 
 {
     id: 1,
@@ -221,10 +219,11 @@ For unit and integration testing, clone repo and execute:
     },
 }
 ```
-***GET /trips/1***
 
-*Output*
-```json
+`GET /trips/1`
+
+### Response
+```javascript
 {
     id: 1,
     startedAt: "2022-02-24T14:43:18-08:00",
@@ -241,10 +240,10 @@ For unit and integration testing, clone repo and execute:
 }
 ```
 
-***PUT /trips***
+`PUT /trips`
 
-*Input*
-```json
+### Request
+```javascript
 {
 
     tripId: 1,
@@ -252,8 +251,8 @@ For unit and integration testing, clone repo and execute:
 }
 ```
 
-*Output*
-```json
+### Response
+```javascript
 
 {
     id: 1,
