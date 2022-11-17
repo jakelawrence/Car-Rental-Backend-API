@@ -1,9 +1,9 @@
 const express = require("express");
-var sqlite3 = require("sqlite3").verbose();
-var formatResBody = require("./helper_modules/formatResponseJSON");
-var checkForValidReqBody = require("./helper_modules/validateReqBody");
-var dbQueries = require("./database/queries");
-var db = new sqlite3.Database("./database/database.db");
+const sqlite3 = require("sqlite3").verbose();
+const formatResBody = require("./helper_modules/formatResponseJSON");
+const checkForValidReqBody = require("./helper_modules/validateReqBody");
+const dbQueries = require("./database/queries");
+const db = new sqlite3.Database("./database/database.db");
 
 //create vehicle table
 db.run(`

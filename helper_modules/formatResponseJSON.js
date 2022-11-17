@@ -1,5 +1,5 @@
 function formVehicleResponse(data) {
-  var res = {
+  let res = {
     id: data.id,
     make: data.make,
   };
@@ -7,7 +7,7 @@ function formVehicleResponse(data) {
 }
 
 function formDriverResponse(data) {
-  var res = {
+  let res = {
     id: data.id,
     driverName: data.driverName,
   };
@@ -15,7 +15,7 @@ function formDriverResponse(data) {
 }
 
 function formTripResponse(data) {
-  var res = {
+  let res = {
     id: data.id,
     status: data.status,
     startedAt: data.startedAt,

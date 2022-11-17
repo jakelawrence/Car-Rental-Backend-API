@@ -1,7 +1,7 @@
 //get vehicle by vehicleId
 function getVehicle(vehicleId, db) {
   return new Promise((resolve, reject) => {
-    var query = `SELECT id, make FROM vehicle WHERE id =${vehicleId}`;
+    let query = `SELECT id, make FROM vehicle WHERE id =${vehicleId}`;
     db.serialize(() => {
       //query for drivers with :id
       db.get(query, function (err, row) {
@@ -18,9 +18,10 @@ function getVehicle(vehicleId, db) {
 //get driver by driverId
 function getDriver(driverId, db) {
   return new Promise((resolve, reject) => {
+    let query = `SELECT id, driverName FROM driver WHERE id =${driverId}`;
     db.serialize(() => {
       //query for drivers with :id
-      db.get(`SELECT id, driverName FROM driver WHERE id =${driverId}`, function (err, row) {
+      db.get(query, function (err, row) {
         if (err) reject(err);
         //no drivers with :id found
         else if (!row) reject("Driver not found.");
@@ -35,23 +36,21 @@ function getDriver(driverId, db) {
 function getTrip(tripId, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
+      let query = `
+      SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
+      FROM trip t 
+      JOIN driver d on d.id = t.driverId 
+      JOIN vehicle v on v.id = t.vehicleId 
+      WHERE t.id=${tripId}
+      `;
       //query for trip with :id
-      db.get(
-        `
-        SELECT t.id, t.status, t.startedAt, t.expectedReturn, t.driverId, d.driverName, t.vehicleId, v.make 
-        FROM trip t 
-        JOIN driver d on d.id = t.driverId 
-        JOIN vehicle v on v.id = t.vehicleId 
-        WHERE t.id=${tripId}
-        `,
-        function (err, row) {
-          if (err) reject(err);
-          //no trip with :id found
-          else if (!row) reject("Trip not found.");
-          //return trip to user
-          else resolve(row);
-        }
-      );
+      db.get(query, function (err, row) {
+        if (err) reject(err);
+        //no trip with :id found
+        else if (!row) reject("Trip not found.");
+        //return trip to user
+        else resolve(row);
+      });
     });
   });
 }
@@ -131,8 +130,9 @@ function insertTrip(data, db) {
 //delete vehicle from database by vehicleId
 function deleteVehicle(data, db) {
   return new Promise((resolve, reject) => {
+    let query = `DELETE from vehicle where id =${data.id}`;
     db.serialize(() => {
-      db.get(`DELETE from vehicle where id =${data.id}`, function (err, row) {
+      db.get(query, function (err, row) {
         if (err) reject(err);
         else resolve(`Vehicle with id = ${data.id} has been deleted.`);
       });
@@ -143,8 +143,9 @@ function deleteVehicle(data, db) {
 //delete driver from database by driverId
 function deleteDriver(data, db) {
   return new Promise((resolve, reject) => {
+    let query = `DELETE from driver where id =${data.id}`;
     db.serialize(() => {
-      db.get(`DELETE from driver where id =${data.id}`, function (err, row) {
+      db.get(query, function (err, row) {
         if (err) reject(err);
         else resolve(`Driver with id = ${data.id} has been deleted.`);
       });
@@ -156,7 +157,8 @@ function deleteDriver(data, db) {
 function deleteTrip(data, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      db.get(`DELETE from trip where id =${data.id}`, function (err, row) {
+      let query = `DELETE from trip where id =${data.id}`;
+      db.get(query, function (err, row) {
         if (err) reject(err);
         else resolve(`Trip with id = ${data.id} has been deleted.`);
       });
