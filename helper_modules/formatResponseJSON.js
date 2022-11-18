@@ -2,6 +2,7 @@ function formVehicleResponse(data) {
   let res = {
     id: data.id,
     make: data.make,
+    model: data.model,
   };
   return res;
 }
@@ -9,7 +10,9 @@ function formVehicleResponse(data) {
 function formDriverResponse(data) {
   let res = {
     id: data.id,
-    driverName: data.driverName,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
   };
   return res;
 }
@@ -22,11 +25,14 @@ function formTripResponse(data) {
     expectedReturn: data.expectedReturn,
     driver: {
       driverId: data.driverId,
-      driverName: data.driverName,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
     },
     vehicle: {
       vehicleId: data.vehicleId,
       make: data.make,
+      model: data.model,
     },
   };
   return res;

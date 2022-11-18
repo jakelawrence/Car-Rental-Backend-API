@@ -1,12 +1,12 @@
 function forInsertVehicle(reqBody) {
-  if (reqBody && reqBody.make) {
+  if (reqBody && reqBody.make && reqBody.model) {
     return true;
   } else {
     return false;
   }
 }
 function forInsertDriver(reqBody) {
-  if (reqBody && reqBody.driverName) {
+  if (reqBody && reqBody.firstName && reqBody.lastName && reqBody.email) {
     return true;
   } else {
     return false;
