@@ -121,17 +121,17 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
   ];
   var trips = [
     {
-      startedAt: "2022-02-24T14:43:18-08:00",
-      expectedReturn: "2022-03-24T14:43:18-08:00",
+      startedAt: "2023-02-24T14:43:18-08:00",
+      expectedReturn: "2023-03-24T14:43:18-08:00",
     },
     {
-      startedAt: "2022-02-24T14:43:18-08:00",
-      expectedReturn: "2022-03-24T14:43:18-08:00",
+      startedAt: "2023-02-24T14:43:18-08:00",
+      expectedReturn: "2023-03-24T14:43:18-08:00",
     },
   ];
   var tripToTestActiveTripDetection = {
-    startedAt: "2022-02-26T14:43:18-08:00",
-    expectedReturn: "2022-03-26T14:43:18-08:00",
+    startedAt: "2023-02-26T14:43:18-08:00",
+    expectedReturn: "2023-03-26T14:43:18-08:00",
   };
 
   drivers.forEach((driver) => {

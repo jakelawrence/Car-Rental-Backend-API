@@ -13,7 +13,15 @@ function forInsertDriver(reqBody) {
   }
 }
 function forInsertTrip(reqBody) {
-  if (reqBody && reqBody.driverId && reqBody.vehicleId && reqBody.startedAt && reqBody.expectedReturn) {
+  if (
+    reqBody &&
+    reqBody.driverId &&
+    reqBody.vehicleId &&
+    reqBody.startedAt &&
+    reqBody.expectedReturn &&
+    new Date(reqBody.startedAt) != "Invalid Date" &&
+    new Date(reqBody.expectedReturn) != "Invalid Date"
+  ) {
     return true;
   } else {
     return false;
