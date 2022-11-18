@@ -1,8 +1,4 @@
-const DUPLICATE_SQL_ERR_CODE = "SQLITE_CONSTRAINT";
-const DUPLICATE_VEHICLE_CODE = "Vehicle with license plate already exists";
-const DUPLICATE_DRIVER_CODE = "Driver with email already exists";
-const OVERLAP_INSERT_TRIP_CODE = "Cannot create trip due to existing trip with this vehicle";
-const OVERLAP_UPDATE_TRIP_CODE = "Cannot update trip due to existing trip with this vehicle";
+const errorCodes = require("../helper_modules/errorCodes");
 
 //get vehicle by vehicleId
 function getVehicle(vehicleId, db) {
@@ -13,7 +9,7 @@ function getVehicle(vehicleId, db) {
       db.get(query, function (err, row) {
         if (err) reject(err);
         //no drivers with :id found
-        else if (!row) reject("Vehicle not found.");
+        else if (!row) reject(errorCodes.VEHICLE_NOT_FOUND_CODE);
         //return driver to user
         else resolve(row);
       });
@@ -30,7 +26,7 @@ function getVehicleByLicensePlate(licensePlate, db) {
       db.get(query, function (err, row) {
         if (err) reject(err);
         //no vehicle with license plate found
-        else if (!row) reject("Vehicle not found.");
+        else if (!row) reject(errorCodes.VEHICLE_NOT_FOUND_CODE);
         //return vehicle to user
         else resolve(row);
       });
@@ -47,7 +43,7 @@ function getDriver(driverId, db) {
       db.get(query, function (err, row) {
         if (err) reject(err);
         //no drivers with :id found
-        else if (!row) reject("Driver not found.");
+        else if (!row) reject(errorCodes.DRIVER_NOT_FOUND_CODE);
         //return driver to user
         else resolve(row);
       });
@@ -64,7 +60,7 @@ function getDriverByEmail(email, db) {
       db.get(query, function (err, row) {
         if (err) reject(err);
         //no drivers with email found
-        else if (!row) reject("Driver not found.");
+        else if (!row) reject(errorCodes.DRIVER_NOT_FOUND_CODE);
         //return driver to user
         else resolve(row);
       });
@@ -89,7 +85,7 @@ function getTrip(tripId, db) {
       db.get(query, function (err, row) {
         if (err) reject(err);
         //no trip with :id found
-        else if (!row) reject("Trip not found.");
+        else if (!row) reject(errorCodes.TRIP_NOT_FOUND_CODE);
         //return trip to user
         else resolve(row);
       });
@@ -115,7 +111,7 @@ function getTripByDateRangeVehicleAndDriver(trip, db) {
       db.get(query, function (err, row) {
         if (err) reject(err);
         //no trip with date range, vehicleId and driverId found
-        else if (!row) reject("Trip not found.");
+        else if (!row) reject(errorCodes.TRIP_NOT_FOUND_CODE);
         //return trip to user
         else resolve(row);
       });
@@ -129,7 +125,7 @@ function insertVehicle(data, db) {
     db.run(`INSERT INTO vehicle (make, model, licensePlate) VALUES('${data.make}', '${data.model}', '${data.licensePlate}')`, function (err) {
       if (err) {
         //if vehicle with license plate already taken
-        if (err.code == DUPLICATE_SQL_ERR_CODE) reject(DUPLICATE_VEHICLE_CODE);
+        if (err.code == errorCodes.DUPLICATE_SQL_ERR_CODE) reject(errorCodes.DUPLICATE_VEHICLE_CODE);
         else reject(err.code);
       } else {
         resolve();
@@ -144,7 +140,7 @@ function insertDriver(data, db) {
     db.run(`INSERT INTO driver (firstName, lastName, email) VALUES('${data.firstName}', '${data.lastName}', '${data.email}')`, function (err) {
       if (err) {
         //if driver with email already taken
-        if (err.code == DUPLICATE_SQL_ERR_CODE) reject(DUPLICATE_DRIVER_CODE);
+        if (err.code == errorCodes.DUPLICATE_SQL_ERR_CODE) reject(errorCodes.DUPLICATE_DRIVER_CODE);
         else reject(err.code);
       } else {
         resolve();
@@ -249,7 +245,7 @@ function filterTrips(data, db) {
             filters.push(`t.id != ${data[key]}`);
             break;
           default:
-            reject("Malformed Request");
+            reject(errorCodes.MALFORMED_REQUEST_CODE);
         }
       }
     }
@@ -283,7 +279,7 @@ function updateTrip(updatedFields, db) {
           updatedFieldsSQL.push(`expectedReturn = '${updatedFields[key]}'`);
           break;
         default:
-          throw new Error(key + " is not a valid field to update.");
+          reject(errorCodes.MALFORMED_REQUEST_CODE);
       }
     }
     var query = `UPDATE trip SET ${updatedFieldsSQL.join(", ")}  WHERE id = ${updatedFields.tripId}`;
@@ -313,7 +309,7 @@ function isValidTripToInsert(tripToInserted, db) {
       //if row count > 0 (trip exists within date range or is active), return false. Else return true
       else {
         if (result.rowCount > 0) {
-          reject(OVERLAP_INSERT_TRIP_CODE);
+          reject(errorCodes.OVERLAP_INSERT_TRIP_CODE);
         } else {
           resolve();
         }
@@ -344,7 +340,7 @@ function isValidTripToUpdated(tripToUpdated, db) {
             updatedFieldsSQL.push(`(expectedReturn >= '${tripToInserted.startedAt}' and expectedReturn <= '${tripToInserted.expectedReturn}')`);
             break;
           default:
-            reject(key + " is not a valid field to update.");
+            reject(errorCodes.MALFORMED_REQUEST_CODE);
         }
       }
       var query = `
@@ -358,7 +354,7 @@ function isValidTripToUpdated(tripToUpdated, db) {
         //if row count > 0 (trip exists within date range or is active), return false. Else return true
         else {
           if (result.rowCount > 0) {
-            reject(OVERLAP_UPDATE_TRIP_CODE);
+            reject(errorCodes.OVERLAP_UPDATE_TRIP_CODE);
           } else {
             resolve();
           }

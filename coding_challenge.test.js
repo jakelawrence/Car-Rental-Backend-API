@@ -1,5 +1,6 @@
 const request = require("supertest");
 const app = require("./routes");
+const errorCodes = require("./helper_modules/errorCodes");
 
 describe("VEHICLE UNIT TEST: Create, insert and delete a vehicle", function () {
   var vehicle = {
@@ -20,12 +21,12 @@ describe("VEHICLE UNIT TEST: Create, insert and delete a vehicle", function () {
   it(`POST /vehicles: Try to insert duplicate vehicle with license plate #${vehicle.licensePlate}`, async function () {
     const response = await request(app).post("/vehicles").send(vehicle);
     expect(response.status).toEqual(409);
-    expect(response.error.text).toEqual("Vehicle with license plate already exists");
+    expect(response.error.text).toEqual(errorCodes.DUPLICATE_VEHICLE_CODE);
   });
   it(`POST /vehicles: Try to insert vehicle model but with invalid request body.`, async function () {
     const response = await request(app).post("/vehicles").send({ test: "error" });
     expect(response.status).toEqual(400);
-    expect(response.error.text).toEqual("Malformed Request");
+    expect(response.error.text).toEqual(errorCodes.MALFORMED_REQUEST_CODE);
   });
   //get vehicle
   it(`GET /vehicles: Fetch vehicle ${vehicle.make} ${vehicle.model}`, async function () {
@@ -40,7 +41,7 @@ describe("VEHICLE UNIT TEST: Create, insert and delete a vehicle", function () {
   it(`GET /vehicles: Fetch vehicle that does not exist.`, async function () {
     const response = await request(app).get(`/vehicles/5`);
     expect(response.status).toEqual(404);
-    expect(response.error.text).toEqual("Vehicle not found.");
+    expect(response.error.text).toEqual(errorCodes.VEHICLE_NOT_FOUND_CODE);
   });
   //delete vehicle
   it(`DELETE /vehicles: Delete vehicle ${vehicle.make} ${vehicle.model}`, async function () {
@@ -68,12 +69,12 @@ describe("DRIVER UNIT TEST: Create, insert and delete a driver", function () {
   it(`POST /drivers: Try to insert duplicate driver model ${driver.firstName} ${driver.lastName}`, async function () {
     const response = await request(app).post("/drivers").send(driver);
     expect(response.status).toEqual(409);
-    expect(response.error.text).toEqual("Driver with email already exists");
+    expect(response.error.text).toEqual(errorCodes.DUPLICATE_DRIVER_CODE);
   });
   it(`POST /drivers: Try to insert driver but with invalid request body.`, async function () {
     const response = await request(app).post("/drivers").send({ driverrrrr: "this is not a valid body" });
     expect(response.status).toEqual(400);
-    expect(response.error.text).toEqual("Malformed Request");
+    expect(response.error.text).toEqual(errorCodes.MALFORMED_REQUEST_CODE);
   });
   //get driver
   it(`GET /drivers: Fetch driver ${driver.firstName} ${driver.lastName} `, async function () {
@@ -88,7 +89,7 @@ describe("DRIVER UNIT TEST: Create, insert and delete a driver", function () {
   it(`GET /drivers: Fetch driver that does not exist.`, async function () {
     const response = await request(app).get(`/drivers/5`);
     expect(response.status).toEqual(404);
-    expect(response.error.text).toEqual("Driver not found.");
+    expect(response.error.text).toEqual(errorCodes.DRIVER_NOT_FOUND_CODE);
   });
   //delete driver
   it(`DELETE /drivers: Delete driver ${driver.firstName} ${driver.lastName}`, async function () {
@@ -226,7 +227,7 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
       expectedReturn: tripToTestActiveTripDetection.expectedReturn,
     });
     expect(response.status).toEqual(409);
-    expect(response.error.text).toEqual("Cannot create trip due to existing trip with this vehicle");
+    expect(response.error.text).toEqual(errorCodes.OVERLAP_INSERT_TRIP_CODE);
   });
 
   it(`GET /trips: Get active trips.`, async function () {
@@ -268,7 +269,7 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
   it(`GET /trips: Fetch trip that does not exist.`, async function () {
     const response = await request(app).get(`/trips/5`);
     expect(response.status).toEqual(404);
-    expect(response.error.text).toEqual("Trip not found.");
+    expect(response.error.text).toEqual(errorCodes.TRIP_NOT_FOUND_CODE);
   });
 
   trips.forEach((trip) => {

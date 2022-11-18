@@ -1,7 +1,8 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
-const formatResBody = require("./helper_modules/formatResponseJSON");
-const checkForValidReqBody = require("./helper_modules/validateReqBody");
+const formatResBody = require("./helper_modules/formatResBody");
+const checkForValidReqBody = require("./helper_modules/checkForValidReqBody");
+const errorCodes = require("./helper_modules/errorCodes");
 const dbQueries = require("./database/queries");
 const db = new sqlite3.Database("./database/database.db");
 
@@ -61,7 +62,7 @@ app.get("/vehicles/:id", async (req, res, next) => {
       .then((vehicle) => res.send(formatResBody.formVehicleResponse(vehicle)))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -82,7 +83,7 @@ app.get("/drivers/:id", async (req, res, next) => {
       .then((driver) => res.json(formatResBody.formDriverResponse(driver)))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -103,7 +104,7 @@ app.get("/trips/:id", async (req, res, next) => {
       .then((trip) => res.json(formatResBody.formTripResponse(trip)))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -148,7 +149,7 @@ app.post("/vehicles", async (req, res, next) => {
       .then((vehicle) => res.send(formatResBody.formVehicleResponse(vehicle)))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -171,7 +172,7 @@ app.post("/drivers", async (req, res, next) => {
       .then((driver) => res.send(formatResBody.formDriverResponse(driver)))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -196,7 +197,7 @@ app.post("/trips", async (req, res, next) => {
       .then((trip) => res.json(formatResBody.formTripResponse(trip)))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -222,7 +223,7 @@ app.put("/trips", async (req, res, next) => {
       .then((trip) => res.json(formatResBody.formTripResponse(trip)))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -241,7 +242,7 @@ app.delete("/vehicles/:id", async (req, res, next) => {
       .then((resMsg) => res.status(204).send(resMsg))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -260,7 +261,7 @@ app.delete("/drivers/:id", async (req, res, next) => {
       .then((resMsg) => res.status(204).send(resMsg))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
@@ -279,35 +280,35 @@ app.delete("/trips/:id", async (req, res, next) => {
       .then((resMsg) => res.status(204).send(resMsg))
       .catch(next);
   } else {
-    next("Malformed Request");
+    next(errorCodes.MALFORMED_REQUEST_CODE);
   }
 });
 
 //error handling
 app.use((err, req, res, next) => {
   switch (err) {
-    case "Malformed Request":
+    case errorCodes.MALFORMED_REQUEST_CODE:
       res.status(400);
       break;
-    case "Cannot create trip due to existing trip with this vehicle":
+    case errorCodes.OVERLAP_INSERT_TRIP_CODE:
       res.status(409);
       break;
-    case "Cannot update trip due to existing trip with this vehicle":
+    case errorCodes.OVERLAP_UPDATE_TRIP_CODE:
       res.status(409);
       break;
-    case "Vehicle with license plate already exists":
+    case errorCodes.DUPLICATE_VEHICLE_CODE:
       res.status(409);
       break;
-    case "Driver with email already exists":
+    case errorCodes.DUPLICATE_DRIVER_CODE:
       res.status(409);
       break;
-    case "Vehicle not found.":
+    case errorCodes.VEHICLE_NOT_FOUND_CODE:
       res.status(404);
       break;
-    case "Driver not found.":
+    case errorCodes.DRIVER_NOT_FOUND_CODE:
       res.status(404);
       break;
-    case "Trip not found.":
+    case errorCodes.TRIP_NOT_FOUND_CODE:
       res.status(404);
       break;
     default:
