@@ -21,17 +21,17 @@ function getVehicle(vehicleId, db) {
   });
 }
 
-//get vehicle by vehicleId
+//get vehicle by license plate
 function getVehicleByLicensePlate(licensePlate, db) {
   return new Promise((resolve, reject) => {
     let query = `SELECT * FROM vehicle WHERE licensePlate ='${licensePlate}'`;
     db.serialize(() => {
-      //query for drivers with :id
+      //query for vehicle with license plate
       db.get(query, function (err, row) {
         if (err) reject(err);
-        //no drivers with :id found
+        //no vehicle with license plate found
         else if (!row) reject("Vehicle not found.");
-        //return driver to user
+        //return vehicle to user
         else resolve(row);
       });
     });
@@ -55,15 +55,15 @@ function getDriver(driverId, db) {
   });
 }
 
-//get driver by driverId
+//get driver by email
 function getDriverByEmail(email, db) {
   return new Promise((resolve, reject) => {
     let query = `SELECT * FROM driver WHERE email ='${email}'`;
     db.serialize(() => {
-      //query for drivers with :id
+      //query for drivers with email
       db.get(query, function (err, row) {
         if (err) reject(err);
-        //no drivers with :id found
+        //no drivers with email found
         else if (!row) reject("Driver not found.");
         //return driver to user
         else resolve(row);
@@ -97,7 +97,7 @@ function getTrip(tripId, db) {
   });
 }
 
-//get trip by tripId
+//get trip by trip date range, vehicleId and driverId
 function getTripByDateRangeVehicleAndDriver(trip, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
@@ -111,10 +111,10 @@ function getTripByDateRangeVehicleAndDriver(trip, db) {
       WHERE t.vehicleId=${trip.vehicleId} and t.driverId=${trip.driverId} 
       and startedAt='${trip.startedAt}' and expectedReturn='${trip.expectedReturn}'
       `;
-      //query for trip with :id
+      //query for trip with date range, vehicleId and driverId
       db.get(query, function (err, row) {
         if (err) reject(err);
-        //no trip with :id found
+        //no trip with date range, vehicleId and driverId found
         else if (!row) reject("Trip not found.");
         //return trip to user
         else resolve(row);
@@ -128,6 +128,7 @@ function insertVehicle(data, db) {
   return new Promise((resolve, reject) => {
     db.run(`INSERT INTO vehicle (make, model, licensePlate) VALUES('${data.make}', '${data.model}', '${data.licensePlate}')`, function (err) {
       if (err) {
+        //if vehicle with license plate already taken
         if (err.code == DUPLICATE_SQL_ERR_CODE) reject(DUPLICATE_VEHICLE_CODE);
         else reject(err.code);
       } else {
@@ -137,11 +138,12 @@ function insertVehicle(data, db) {
   });
 }
 
-//insert vehicle into database
+//insert driver into database
 function insertDriver(data, db) {
   return new Promise((resolve, reject) => {
     db.run(`INSERT INTO driver (firstName, lastName, email) VALUES('${data.firstName}', '${data.lastName}', '${data.email}')`, function (err) {
       if (err) {
+        //if driver with email already taken
         if (err.code == DUPLICATE_SQL_ERR_CODE) reject(DUPLICATE_DRIVER_CODE);
         else reject(err.code);
       } else {
@@ -214,6 +216,7 @@ function deleteTripById(tripId, db) {
 //get trips from database by filtered data
 function filterTrips(data, db) {
   return new Promise((resolve, reject) => {
+    //create query for filtering trips
     var filters = [];
     var query = `
     SELECT t.id, t.startedAt, t.expectedReturn, t.status,
@@ -264,6 +267,7 @@ function filterTrips(data, db) {
 //update a trip in the database
 function updateTrip(updatedFields, db) {
   return new Promise((resolve, reject) => {
+    //create query for updating trips
     var updatedFieldsSQL = [];
     for (const key of Object.keys(updatedFields)) {
       switch (key) {

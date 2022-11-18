@@ -44,7 +44,14 @@ db.exec(`
 const app = express();
 app.use(express.json());
 
-//GET vehicle by id
+/*
+GET vehicle by id
+Steps:
+  1. Check if vehicle id is passed into endpoint through req body
+  2. Get vehicle from database (throw error if does not exist)
+  3. Format data for res body
+  4. Return res body
+*/
 app.get("/vehicles/:id", async (req, res, next) => {
   //checks if vehicle id included in req
   if (req.params.id) {
@@ -58,7 +65,14 @@ app.get("/vehicles/:id", async (req, res, next) => {
   }
 });
 
-//GET driver by id
+/*
+GET driver by id
+Steps:
+  1. Check if driver id is passed into endpoint through req body
+  2. Get driver from database (throw error if does not exist)
+  3. Format data for res body
+  4. Return res body
+*/
 app.get("/drivers/:id", async (req, res, next) => {
   //checks if driver id included in req
   if (req.params.id) {
@@ -72,7 +86,14 @@ app.get("/drivers/:id", async (req, res, next) => {
   }
 });
 
-//GET trip by id
+/*
+GET trip by id
+Steps:
+  1. Check if trip id is passed into endpoint through req body
+  2. Get trip from database (throw error if does not exist)
+  3. Format data for res body
+  4. Return res body
+*/
 app.get("/trips/:id", async (req, res, next) => {
   //checks if trip id included in req
   if (req.params.id) {
@@ -86,7 +107,14 @@ app.get("/trips/:id", async (req, res, next) => {
   }
 });
 
-//GET trip by filtered data
+/*
+GET trip by filtered data
+Steps:
+  1. Pass filters into filtered data and parse filters for query
+  2. Get trips based on filtered data
+  3. Format trips for res body
+  4. Return res body
+*/
 app.get("/trips", async (req, res, next) => {
   //get trips by filters
   await dbQueries
@@ -101,7 +129,15 @@ app.get("/trips", async (req, res, next) => {
     .catch(next);
 });
 
-//create vehicle
+/*
+POST vehicle into database
+Steps:
+  1. Check if req body has required fields for creating vehicle
+  2. Insert vehicle into database
+  3. Query database for inserted vehicle by license plate (unique to vehicle)
+  4. Format the vehicle data for res body
+  5. Return res body
+*/
 app.post("/vehicles", async (req, res, next) => {
   //check if req body for creating vehicle is valid
   if (checkForValidReqBody.forInsertVehicle(req.body)) {
@@ -116,7 +152,15 @@ app.post("/vehicles", async (req, res, next) => {
   }
 });
 
-//create driver
+/*
+POST driver into database
+Steps:
+  1. Check if req body has required fields for creating driver
+  2. Insert driver into database
+  3. Query database for inserted driver based on email (unique to driver)
+  4. Format the driver data for res body
+  5. Return res body
+*/
 app.post("/drivers", async (req, res, next) => {
   //check if req body for creating driver is valid
   if (checkForValidReqBody.forInsertDriver(req.body)) {
@@ -131,7 +175,16 @@ app.post("/drivers", async (req, res, next) => {
   }
 });
 
-//create trip
+/*
+POST trip into database
+Steps:
+  1. Check if req body has required fields for creating trip
+  2. Check if trip to be inserted isn't within date range or active during other trips with vehicle
+  3. Insert trip into database
+  3. Query database for inserted trip based on date range, driver and vehicle (unique to trip)
+  4. Format the trip data for res body
+  5. Return res body
+*/
 app.post("/trips", async (req, res, next) => {
   let tripToInsert = req.body;
   //check if req body for creating trip is valid
@@ -147,7 +200,16 @@ app.post("/trips", async (req, res, next) => {
   }
 });
 
-//update trip
+/*
+PUT trip in database
+Steps:
+  1. Check if req body has required fields for updating trip
+  2. Check if trip to be updated isn't within date range or active during other trips with vehicle
+  3. Update trip in database
+  3. Query database for updated trip based on date range, driver and vehicle (unique to trip)
+  4. Format the trip data for res body
+  5. Return res body
+*/
 app.put("/trips", async (req, res, next) => {
   let tripToBeUpdated = req.body;
   //check if req body for updating trip is valid
@@ -164,7 +226,13 @@ app.put("/trips", async (req, res, next) => {
   }
 });
 
-//delete vehicle
+/*
+DELETE vehicle in database
+Steps:
+  1. Check if vehicle id is passed into endpoint through req body
+  2. Delete vehicle
+  3. Return confirmation message of deletion
+*/
 app.delete("/vehicles/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
@@ -177,7 +245,13 @@ app.delete("/vehicles/:id", async (req, res, next) => {
   }
 });
 
-//delete driver
+/*
+DELETE driver in database
+Steps:
+  1. Check if driver id is passed into endpoint through req body
+  2. Delete driver
+  3. Return confirmation message of deletion
+*/
 app.delete("/drivers/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
@@ -190,7 +264,13 @@ app.delete("/drivers/:id", async (req, res, next) => {
   }
 });
 
-//delete trip
+/*
+DELETE trip in database
+Steps:
+  1. Check if trip id is passed into endpoint through req body
+  2. Delete trip
+  3. Return confirmation message of deletion
+*/
 app.delete("/trips/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
