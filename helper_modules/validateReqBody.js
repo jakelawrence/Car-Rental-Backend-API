@@ -1,5 +1,5 @@
 function forInsertVehicle(reqBody) {
-  if (reqBody && reqBody.make && reqBody.model) {
+  if (reqBody && reqBody.make && reqBody.model && reqBody.licensePlate) {
     return true;
   } else {
     return false;
@@ -19,6 +19,7 @@ function forInsertTrip(reqBody) {
     return false;
   }
 }
+
 function forUpdateTrip(reqBody) {
   if (reqBody && reqBody.tripId) {
     return true;
