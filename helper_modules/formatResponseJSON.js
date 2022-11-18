@@ -1,6 +1,6 @@
 function formVehicleResponse(data) {
   let res = {
-    vehicleId: data.vehicleId,
+    id: data.id,
     make: data.make,
     model: data.model,
     licensePlate: data.licensePlate,
@@ -10,7 +10,7 @@ function formVehicleResponse(data) {
 
 function formDriverResponse(data) {
   let res = {
-    driverId: data.driverId,
+    id: data.id,
     firstName: data.firstName,
     lastName: data.lastName,
     email: data.email,
@@ -20,7 +20,7 @@ function formDriverResponse(data) {
 
 function formTripResponse(data) {
   let res = {
-    tripId: data.tripId,
+    id: data.id,
     status: data.status,
     startedAt: data.startedAt,
     expectedReturn: data.expectedReturn,

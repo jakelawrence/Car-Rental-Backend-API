@@ -7,7 +7,7 @@ const OVERLAP_UPDATE_TRIP_CODE = "Cannot update trip due to existing trip with t
 //get vehicle by vehicleId
 function getVehicle(vehicleId, db) {
   return new Promise((resolve, reject) => {
-    let query = `SELECT * FROM vehicle WHERE vehicleId =${vehicleId}`;
+    let query = `SELECT * FROM vehicle WHERE id =${vehicleId}`;
     db.serialize(() => {
       //query for drivers with :id
       db.get(query, function (err, row) {
@@ -41,7 +41,7 @@ function getVehicleByLicensePlate(licensePlate, db) {
 //get driver by driverId
 function getDriver(driverId, db) {
   return new Promise((resolve, reject) => {
-    let query = `SELECT * FROM driver WHERE driverId =${driverId}`;
+    let query = `SELECT * FROM driver WHERE id =${driverId}`;
     db.serialize(() => {
       //query for drivers with :id
       db.get(query, function (err, row) {
@@ -77,13 +77,13 @@ function getTrip(tripId, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       let query = `
-      SELECT t.tripId, t.startedAt, t.expectedReturn, t.status,
-        d.driverId, d.firstName, d.lastName, d.email, 
-        v.vehicleId, v.make, v.model, v.licensePlate 
+      SELECT t.id, t.startedAt, t.expectedReturn, t.status,
+        t.driverId, d.firstName, d.lastName, d.email, 
+        t.vehicleId, v.make, v.model, v.licensePlate 
       FROM trip t 
-      JOIN driver d on d.driverId = t.driverId 
-      JOIN vehicle v on v.vehicleId = t.vehicleId 
-      WHERE t.tripId=${tripId}
+      JOIN driver d on d.id = t.driverId 
+      JOIN vehicle v on v.id = t.vehicleId 
+      WHERE t.id=${tripId}
       `;
       //query for trip with :id
       db.get(query, function (err, row) {
@@ -102,12 +102,12 @@ function getTripByDateRangeVehicleAndDriver(trip, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       let query = `
-      SELECT t.tripId, t.startedAt, t.expectedReturn, t.status,
-        d.driverId, d.firstName, d.lastName, d.email, 
-        v.vehicleId, v.make, v.model, v.licensePlate 
+      SELECT t.id, t.startedAt, t.expectedReturn, t.status,
+        t.driverId, d.firstName, d.lastName, d.email, 
+        t.vehicleId, v.make, v.model, v.licensePlate 
       FROM trip t 
-      JOIN driver d on d.driverId = t.driverId 
-      JOIN vehicle v on v.vehicleId = t.vehicleId 
+      JOIN driver d on d.id = t.driverId 
+      JOIN vehicle v on v.id = t.vehicleId 
       WHERE t.vehicleId=${trip.vehicleId} and t.driverId=${trip.driverId} 
       and startedAt='${trip.startedAt}' and expectedReturn='${trip.expectedReturn}'
       `;
@@ -176,7 +176,7 @@ function insertTrip(data, db) {
 function deleteVehicleById(vehicleId, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      let query = `DELETE from vehicle where vehicleId =${vehicleId}`;
+      let query = `DELETE from vehicle where id =${vehicleId}`;
       db.get(query, function (err, row) {
         if (err) reject(err);
         else resolve(`Vehicle with id = ${vehicleId} has been deleted.`);
@@ -189,7 +189,7 @@ function deleteVehicleById(vehicleId, db) {
 function deleteDriverById(driverId, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      let query = `DELETE from driver where driverId =${driverId}`;
+      let query = `DELETE from driver where id =${driverId}`;
       db.get(query, function (err, row) {
         if (err) reject(err);
         else resolve(`Driver with id = ${driverId} has been deleted.`);
@@ -202,7 +202,7 @@ function deleteDriverById(driverId, db) {
 function deleteTripById(tripId, db) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      let query = `DELETE from trip where tripId =${tripId}`;
+      let query = `DELETE from trip where id =${tripId}`;
       db.get(query, function (err, row) {
         if (err) reject(err);
         else resolve(`Trip with id = ${tripId} has been deleted.`);
@@ -216,12 +216,12 @@ function filterTrips(data, db) {
   return new Promise((resolve, reject) => {
     var filters = [];
     var query = `
-    SELECT t.tripId, t.startedAt, t.expectedReturn, t.status,
-      d.driverId, d.firstName, d.lastName, d.email, 
-      v.vehicleId, v.make, v.model, v.licensePlate 
+    SELECT t.id, t.startedAt, t.expectedReturn, t.status,
+      t.driverId, d.firstName, d.lastName, d.email, 
+      t.vehicleId, v.make, v.model, v.licensePlate 
     FROM trip t 
-    JOIN driver d on d.driverId = t.driverId 
-    JOIN vehicle v on v.vehicleId = t.vehicleId `;
+    JOIN driver d on d.id = t.driverId 
+    JOIN vehicle v on v.id = t.vehicleId `;
 
     if (Object.keys(data).length > 0) {
       query = query.concat(" WHERE ");
@@ -264,7 +264,6 @@ function filterTrips(data, db) {
 //update a trip in the database
 function updateTrip(updatedFields, db) {
   return new Promise((resolve, reject) => {
-    var query = `UPDATE trip SET `;
     var updatedFieldsSQL = [];
     for (const key of Object.keys(updatedFields)) {
       switch (key) {
@@ -279,18 +278,11 @@ function updateTrip(updatedFields, db) {
         case "expectedReturn":
           updatedFieldsSQL.push(`expectedReturn = '${updatedFields[key]}'`);
           break;
-        case "vehicleId":
-          updatedFieldsSQL.push(`vehicleId = ${updatedFields[key]}`);
-          break;
-        case "driverId":
-          updatedFieldsSQL.push(`driverId = ${updatedFields[key]}`);
-          break;
         default:
           throw new Error(key + " is not a valid field to update.");
       }
     }
-    query = query.concat(updatedFieldsSQL.join(", "));
-    query = query.concat(` WHERE tripId = ${updatedFields.tripId}`);
+    var query = `UPDATE trip SET ${updatedFieldsSQL.join(", ")}  WHERE id = ${updatedFields.tripId}`;
     db.serialize(() => {
       db.run(query, function (err, rows) {
         if (err) reject(err);
@@ -304,7 +296,7 @@ function isValidTripToInsert(tripToInserted, db) {
   return new Promise((resolve, reject) => {
     //get count of existing trips that fall within date range of trip or are active (if trip being inserted is active)
     var query = `
-                SELECT count(distinct tripId) as rowCount 
+                SELECT count(distinct id) as rowCount 
                 from TRIP 
                 where vehicleId = ${tripToInserted.vehicleId} and 
                 ((startedAt >= '${tripToInserted.startedAt}' and startedAt <= '${tripToInserted.expectedReturn}') or 
@@ -330,7 +322,7 @@ function isValidTripToUpdated(tripToUpdated, db) {
   return new Promise((resolve, reject) => {
     //if status is being changed to inactive
     if (tripToUpdated.status == "inactive") {
-      resolve(true);
+      resolve();
     } else {
       var updatedFieldsSQL = [];
       //create query based on fields to be updated
@@ -352,7 +344,7 @@ function isValidTripToUpdated(tripToUpdated, db) {
         }
       }
       var query = `
-                  SELECT count(distinct tripId) as rowCount 
+                  SELECT count(distinct id) as rowCount 
                   from TRIP 
                   where vehicleId = ${tripToUpdated.vehicleId} and id != ${tripToUpdated.tripId} and (${updatedFieldsSQL.join(" or ")})
                   `;

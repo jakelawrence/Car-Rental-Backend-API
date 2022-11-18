@@ -8,7 +8,7 @@ const db = new sqlite3.Database("./database/database.db");
 //create vehicle table
 db.exec(`
     CREATE TABLE IF NOT EXISTS vehicle (
-      vehicleId INTEGER PRIMARY KEY, 
+      id INTEGER PRIMARY KEY, 
       make varchar(50) NOT NULL,
       model varchar(50) NOT NULL,
       licensePlate varchar(50) UNIQUE NOT NULL
@@ -18,7 +18,7 @@ db.exec(`
 //create driver table
 db.exec(`
     CREATE TABLE IF NOT EXISTS driver (
-      driverId INTEGER PRIMARY KEY, 
+      id INTEGER PRIMARY KEY, 
       firstName varchar(50) NOT NULL,
       lastName varchar(50) NOT NULL,
       email varchar(50) UNIQUE NOT NULL
@@ -28,14 +28,14 @@ db.exec(`
 //create trip table
 db.exec(`
     CREATE TABLE IF NOT EXISTS trip (
-      tripId INTEGER PRIMARY KEY, 
-      status varchar(50) DEFAULT 'active', 
+      id INTEGER PRIMARY KEY, 
+      status varchar(50), 
       vehicleId INTEGER, 
       driverId INTEGER, 
       startedAt DATETIME NOT NULL, 
-      expectedReturn DATETIME NOT NULL, 
-      FOREIGN KEY (vehicleId) REFERENCES vehicle(vehicleId),
-      FOREIGN KEY (driverId) REFERENCES driver(driverId)
+      expectedReturn DATETIME NOT NULL,
+      FOREIGN KEY (vehicleId) REFERENCES vehicle(id),
+      FOREIGN KEY (driverId) REFERENCES driver(id)
     );
     CREATE INDEX IF NOT EXISTS idx_startedAt ON trip (startedAt);
     CREATE INDEX IF NOT EXISTS idx_expectedReturn ON trip (expectedReturn);
@@ -165,11 +165,11 @@ app.put("/trips", async (req, res, next) => {
 });
 
 //delete vehicle
-app.delete("/vehicles/:vehicleId", async (req, res, next) => {
+app.delete("/vehicles/:id", async (req, res, next) => {
   //checks if id included in req
-  if (req.params.vehicleId) {
+  if (req.params.id) {
     await dbQueries
-      .deleteVehicleById(req.params.vehicleId, db)
+      .deleteVehicleById(req.params.id, db)
       .then((resMsg) => res.status(204).send(resMsg))
       .catch(next);
   } else {
@@ -178,11 +178,11 @@ app.delete("/vehicles/:vehicleId", async (req, res, next) => {
 });
 
 //delete driver
-app.delete("/drivers/:driverId", async (req, res, next) => {
+app.delete("/drivers/:id", async (req, res, next) => {
   //checks if id included in req
-  if (req.params.driverId) {
+  if (req.params.id) {
     await dbQueries
-      .deleteDriverById(req.params.driverId, db)
+      .deleteDriverById(req.params.id, db)
       .then((resMsg) => res.status(204).send(resMsg))
       .catch(next);
   } else {
@@ -191,11 +191,11 @@ app.delete("/drivers/:driverId", async (req, res, next) => {
 });
 
 //delete trip
-app.delete("/trips/:tripId", async (req, res, next) => {
+app.delete("/trips/:id", async (req, res, next) => {
   //checks if id included in req
-  if (req.params.tripId) {
+  if (req.params.id) {
     await dbQueries
-      .deleteTripById(req.params.tripId, db)
+      .deleteTripById(req.params.id, db)
       .then((resMsg) => res.status(204).send(resMsg))
       .catch(next);
   } else {
@@ -215,7 +215,10 @@ app.use((err, req, res, next) => {
     case "Cannot update trip due to existing trip with this vehicle":
       res.status(409);
       break;
-    case "Vehicle already exists":
+    case "Vehicle with license plate already exists":
+      res.status(409);
+      break;
+    case "Driver with email already exists":
       res.status(409);
       break;
     case "Vehicle not found.":
