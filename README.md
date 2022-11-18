@@ -128,7 +128,7 @@ Your local car sharing company is looking to create an application that can help
 ```javascript
 {
     make: "Honda",
-    model: "Civic,
+    model: "Civic",
     licensePlate: "123ABC"
 }
 ```
@@ -140,7 +140,7 @@ Your local car sharing company is looking to create an application that can help
 {
     id: 1,
     make: "Honda",
-    model: "Civic,
+    model: "Civic",
     licensePlate: "123ABC"
 }
 ```
@@ -153,7 +153,7 @@ Your local car sharing company is looking to create an application that can help
 {
     id: 1,
     make: "Honda",
-    model: "Civic,
+    model: "Civic",
     licensePlate: "123ABC"
 }
 ```
@@ -235,7 +235,7 @@ Your local car sharing company is looking to create an application that can help
     vehicle: {
         vehicleId: 1,
         make: "Honda",
-        model: "Civic,
+        model: "Civic",
         licensePlate: "123ABC"
     },
 }
@@ -260,7 +260,7 @@ Your local car sharing company is looking to create an application that can help
     vehicle: {
         vehicleId: 1,
         make: "Honda",
-        model: "Civic,
+        model: "Civic",
         licensePlate: "123ABC"
     },
 }
@@ -296,7 +296,7 @@ Your local car sharing company is looking to create an application that can help
     vehicle: {
         vehicleId: 1,
         make: "Honda",
-        model: "Civic,
+        model: "Civic",
         licensePlate: "123ABC"
     },
 }
