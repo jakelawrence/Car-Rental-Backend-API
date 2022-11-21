@@ -109,7 +109,10 @@ function getTripByDateRangeVehicleAndDriver(trip, db) {
       `;
       //query for trip with date range, vehicleId and driverId
       db.get(query, function (err, row) {
-        if (err) reject(err);
+        if (err) {
+          console.log(err);
+          reject(err);
+        }
         //no trip with date range, vehicleId and driverId found
         else if (!row) reject(errorCodes.TRIP_NOT_FOUND_CODE);
         //return trip to user
@@ -241,6 +244,12 @@ function filterTrips(data, db) {
           case "expectedReturn":
             filters.push(`expectedReturn = '${data[key]}'`);
             break;
+          case "dateRangeStart":
+            filters.push(`startedAt >= '${data.dateRangeStart}'`);
+            break;
+          case "dateRangeEnd":
+            filters.push(`expectedReturn <= '${data.dateRangeEnd}'`);
+            break;
           case "notId":
             filters.push(`t.id != ${data[key]}`);
             break;
@@ -318,13 +327,18 @@ function isValidTripToInsert(tripToInserted, db) {
   });
 }
 
-function isValidTripToUpdated(tripToUpdated, db) {
+function isValidTripToUpdated(tripToUpdated, tripBeforeUpdate, db) {
   return new Promise((resolve, reject) => {
     //if status is being changed to inactive
-    if (tripToUpdated.status == "inactive") {
+    if (tripToUpdated.status == "inactive" && !tripToUpdated.startedAt && !tripToUpdated.expectedReturn) {
       resolve();
     } else {
-      var updatedFieldsSQL = [];
+      let updatedFieldsSQL = [];
+      let startedAt = tripToUpdated.startedAt ? tripToUpdated.startedAt : tripBeforeUpdate.startedAt;
+      let expectedReturn = tripToUpdated.expectedReturn ? tripToUpdated.expectedReturn : tripBeforeUpdate.expectedReturn;
+      //if updated times are invalid
+      if (new Date(startedAt) > new Date(expectedReturn)) reject(errorCodes.MALFORMED_REQUEST_CODE);
+
       //create query based on fields to be updated
       for (const key of Object.keys(tripToUpdated)) {
         switch (key) {
@@ -334,10 +348,10 @@ function isValidTripToUpdated(tripToUpdated, db) {
             if (tripToUpdated.status == "active") updatedFieldsSQL.push(`status = '${tripToUpdated.status}'`);
             break;
           case "startedAt":
-            updatedFieldsSQL.push(`(startedAt >= '${tripToInserted.startedAt}' and startedAt <= '${tripToInserted.expectedReturn}')`);
+            updatedFieldsSQL.push(`(startedAt >= '${startedAt}' and startedAt <= '${expectedReturn}')`);
             break;
           case "expectedReturn":
-            updatedFieldsSQL.push(`(expectedReturn >= '${tripToInserted.startedAt}' and expectedReturn <= '${tripToInserted.expectedReturn}')`);
+            updatedFieldsSQL.push(`(expectedReturn >= '${startedAt}' and expectedReturn <= '${expectedReturn}')`);
             break;
           default:
             reject(errorCodes.MALFORMED_REQUEST_CODE);
@@ -346,7 +360,7 @@ function isValidTripToUpdated(tripToUpdated, db) {
       var query = `
                   SELECT count(distinct id) as rowCount 
                   from TRIP 
-                  where vehicleId = ${tripToUpdated.vehicleId} and id != ${tripToUpdated.tripId} and (${updatedFieldsSQL.join(" or ")})
+                  where vehicleId = ${tripBeforeUpdate.vehicleId} and id != ${tripToUpdated.tripId} and (${updatedFieldsSQL.join(" or ")})
                   `;
       //get count of existing trips that fall within date range of trip or are active (if trip being inserted is active)
       db.get(query, function (err, result) {

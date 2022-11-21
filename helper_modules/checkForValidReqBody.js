@@ -20,7 +20,8 @@ function forInsertTrip(reqBody) {
     reqBody.startedAt &&
     reqBody.expectedReturn &&
     new Date(reqBody.startedAt) != "Invalid Date" &&
-    new Date(reqBody.expectedReturn) != "Invalid Date"
+    new Date(reqBody.expectedReturn) != "Invalid Date" &&
+    new Date(reqBody.startedAt) <= new Date(reqBody.expectedReturn)
   ) {
     return true;
   } else {

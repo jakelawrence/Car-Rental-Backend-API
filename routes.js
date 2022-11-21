@@ -191,7 +191,9 @@ app.post("/trips", async (req, res, next) => {
   //check if req body for creating trip is valid
   if (checkForValidReqBody.forInsertTrip(tripToInsert)) {
     await dbQueries
-      .isValidTripToInsert(tripToInsert, db)
+      .getVehicle(tripToInsert.vehicleId, db)
+      .then(async () => await dbQueries.getDriver(tripToInsert.driverId, db))
+      .then(async () => await dbQueries.isValidTripToInsert(tripToInsert, db))
       .then(async () => await dbQueries.insertTrip(req.body, db))
       .then(async () => await dbQueries.getTripByDateRangeVehicleAndDriver(req.body, db))
       .then((trip) => res.json(formatResBody.formTripResponse(trip)))
@@ -217,7 +219,7 @@ app.put("/trips", async (req, res, next) => {
   if (checkForValidReqBody.forUpdateTrip(tripToBeUpdated)) {
     await dbQueries
       .getTrip(tripToBeUpdated.tripId, db)
-      .then(async () => await dbQueries.isValidTripToUpdated(tripToBeUpdated, db))
+      .then(async (tripBeforeUpdate) => await dbQueries.isValidTripToUpdated(tripToBeUpdated, tripBeforeUpdate, db))
       .then(async () => await dbQueries.updateTrip(tripToBeUpdated, db))
       .then(async () => await dbQueries.getTrip(tripToBeUpdated.tripId, db))
       .then((trip) => res.json(formatResBody.formTripResponse(trip)))
@@ -238,8 +240,9 @@ app.delete("/vehicles/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
     await dbQueries
-      .deleteVehicleById(req.params.id, db)
-      .then((resMsg) => res.status(204).send(resMsg))
+      .getVehicle(req.params.id, db)
+      .then(async () => await dbQueries.deleteVehicleById(req.params.id, db))
+      .then((resMsg) => res.status(200).send(resMsg))
       .catch(next);
   } else {
     next(errorCodes.MALFORMED_REQUEST_CODE);
@@ -257,8 +260,9 @@ app.delete("/drivers/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
     await dbQueries
-      .deleteDriverById(req.params.id, db)
-      .then((resMsg) => res.status(204).send(resMsg))
+      .getDriver(req.params.id, db)
+      .then(async () => await dbQueries.deleteDriverById(req.params.id, db))
+      .then((resMsg) => res.status(200).send(resMsg))
       .catch(next);
   } else {
     next(errorCodes.MALFORMED_REQUEST_CODE);
@@ -276,8 +280,9 @@ app.delete("/trips/:id", async (req, res, next) => {
   //checks if id included in req
   if (req.params.id) {
     await dbQueries
-      .deleteTripById(req.params.id, db)
-      .then((resMsg) => res.status(204).send(resMsg))
+      .getTrip(req.params.id, db)
+      .then(async () => await dbQueries.deleteTripById(req.params.id, db))
+      .then((resMsg) => res.status(200).send(resMsg))
       .catch(next);
   } else {
     next(errorCodes.MALFORMED_REQUEST_CODE);
@@ -315,7 +320,12 @@ app.use((err, req, res, next) => {
       res.status(500);
       break;
   }
-  res.send(err);
+  console.log(err);
+  if (res.statusCode == 500) {
+    res.send(err.message);
+  } else {
+    res.send(err);
+  }
 });
 
 //export for testing
