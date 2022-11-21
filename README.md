@@ -47,11 +47,13 @@ Your local car sharing company is looking to create an application that can help
 
 `GET /trips/?status=active|inactive`
 
-| Parameter        | Type   | Description                      |
-| :--------------- | :----- | :------------------------------- |
-| `status`         | `int`  | Filter by status of trip         |
-| `startedAt`      | `date` | Filter by startedAt of trip      |
-| `expectedReturn` | `date` | Filter by expectedReturn of trip |
+| Parameter        | Type   | Description                           |
+| :--------------- | :----- | :------------------------------------ |
+| `status`         | `int`  | Filter by status of trip              |
+| `startedAt`      | `date` | Filter by startedAt of trip           |
+| `expectedReturn` | `date` | Filter by expectedReturn of trip      |
+| `dateRangeStart` | `date` | Filter trips by a starting date range |
+| `dateRangeEnd`   | `date` | Filter trips by an ending date range  |
 
 ### Create vehicle
 
