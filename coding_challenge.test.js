@@ -46,7 +46,7 @@ describe("VEHICLE UNIT TEST: Create, insert and delete a vehicle", function () {
   //delete vehicle
   it(`DELETE /vehicles: Delete vehicle ${vehicle.make} ${vehicle.model}`, async function () {
     const response = await request(app).delete(`/vehicles/${vehicle.id}`);
-    expect(response.status).toEqual(204);
+    expect(response.status).toEqual(200);
   });
 });
 
@@ -94,7 +94,7 @@ describe("DRIVER UNIT TEST: Create, insert and delete a driver", function () {
   //delete driver
   it(`DELETE /drivers: Delete driver ${driver.firstName} ${driver.lastName}`, async function () {
     const response = await request(app).delete(`/drivers/${driver.id}`);
-    expect(response.status).toEqual(204);
+    expect(response.status).toEqual(200);
   });
 });
 
@@ -276,7 +276,7 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
     //delete driver
     it(`DELETE /trips`, async function () {
       const response = await request(app).delete(`/trips/${trip.id}`);
-      expect(response.status).toEqual(204);
+      expect(response.status).toEqual(200);
     });
   });
 
@@ -284,7 +284,7 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
     //delete driver
     it(`DELETE /drivers`, async function () {
       const response = await request(app).delete(`/drivers/${driver.id}`);
-      expect(response.status).toEqual(204);
+      expect(response.status).toEqual(200);
     });
   });
 
@@ -292,7 +292,7 @@ describe("TRIP INTEGRATION TEST: Create, insert and delete a trip", function () 
     //delete driver
     it(`DELETE /vehicles`, async function () {
       const response = await request(app).delete(`/vehicles/${vehicle.id}`);
-      expect(response.status).toEqual(204);
+      expect(response.status).toEqual(200);
     });
   });
 });

@@ -109,10 +109,7 @@ function getTripByDateRangeVehicleAndDriver(trip, db) {
       `;
       //query for trip with date range, vehicleId and driverId
       db.get(query, function (err, row) {
-        if (err) {
-          console.log(err);
-          reject(err);
-        }
+        if (err) reject(err);
         //no trip with date range, vehicleId and driverId found
         else if (!row) reject(errorCodes.TRIP_NOT_FOUND_CODE);
         //return trip to user

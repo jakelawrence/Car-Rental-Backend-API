@@ -320,7 +320,6 @@ app.use((err, req, res, next) => {
       res.status(500);
       break;
   }
-  console.log(err);
   if (res.statusCode == 500) {
     res.send(err.message);
   } else {
