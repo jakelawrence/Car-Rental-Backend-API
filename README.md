@@ -1,4 +1,4 @@
-# Smartcar - Experience Team - Back-End Coding Challenge
+# Car Rental Backend API
 
 Your local car sharing company is looking to create an application that can help them manage the vehicles and the customers who rent the vehicles. Their application will need to be able to do the following:
 
