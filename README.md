@@ -1,5 +1,8 @@
 # Car Rental Backend API
 
+![Car Rental Backend API](https://raw.githubusercontent.com/jakelawrence/Car-Rental-Backend-API/master/img/car-rental-backend-api.jpg?raw=true)
+
+
 Your local car sharing company is looking to create an application that can help them manage the vehicles and the customers who rent the vehicles. Their application will need to be able to do the following:
 
 1. Create and get a vehicle, driver and trip
