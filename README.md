@@ -2,6 +2,7 @@
 
 ![Car Rental Backend API](https://raw.githubusercontent.com/jakelawrence/Car-Rental-Backend-API/master/img/car-rental-backend-api.jpg?raw=true)
 
+## Introduction
 
 This Car Rental API written in Node.js and Express.js provides convenient and efficient access to a car rental service. It features several endpoints that allow users to create and retrieve information about vehicles, drivers, and trips. The API also provides a list of active vehicles and their associated drivers, allowing users to stay up to date on the status of their rental vehicles. Whether you're a business looking to streamline your car rental operations or an individual in need of rental services, this API provides a user-friendly and reliable solution.
 
